@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # Anaximander Map Tile Downloader
-
+import math
 import os
 import shutil
 
@@ -103,19 +103,29 @@ def main():
     zoom = int(input("Zoom / Level of Detail (usually 0-18, larger = more data & detail): "))
     tileServer = str(input("Tile Server URL: "))
 
-    #latStart, lonStart = 42.35843, -77.087447
+    #latStart, lonStart = 42.363531, -71.096362
     #latEnd, lonEnd = 42.354185, -71.069741
-    #zoom = 16
+    #zoom = 17
     #tileServer = "http://tile.stamen.com/terrain-background/%zoom%/%xTile%/%yTile%.jpg"
     #tileServer = "https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png"
 
     tileExtension = os.path.splitext(tileServer)[1]
     if tileExtension == "":
         print("The Tile Server URL must end with a file type extension (ex. .jpg, .png, etc)")
-        return 2
+        return 3
 
-    tileStartX, tileStartY = tilenames.tileXY(latStart, lonStart, zoom)
-    tileEndX, tileEndY = tilenames.tileXY(latEnd, lonEnd, zoom)
+    tileStartX, tileStartY = tilenames.tileXY(latStart, lonStart, zoom, True)
+    tileEndX, tileEndY = tilenames.tileXY(latEnd, lonEnd, zoom, True)
+
+    # Sort the numbers low to high
+    if tileStartY > tileEndY:
+        tileStartY, tileEndY = tileEndY, tileStartY
+
+    if tileStartX > tileEndX:
+        tileStartX, tileEndX = tileEndX, tileStartX
+
+    tileStartX, tileStartY = math.floor(tileStartX), math.floor(tileStartY)
+    tileEndX, tileEndY = math.ceil(tileEndX), math.ceil(tileEndY)
 
     # S lat, W lon, N lat, E lon
     startCornerCoords = tilenames.tileEdges(tileStartX, tileStartY, zoom)
@@ -129,6 +139,8 @@ def main():
 
     print("Downloading X tiles", tileStartX, "through", tileEndX)
     print("Downloading Y tiles", tileStartY, "through", tileEndY)
+
+    print("Downloading a total of", abs(tileEndX - tileStartX + 1) * abs(tileEndY - tileStartY + 1), "tiles")
 
     if not os.path.exists(tilesDir):
         os.mkdir(tilesDir)

@@ -1,6 +1,10 @@
 # Anaxi Tile Downloader
 Downloads and stitches images downloaded from Map Tile servers.
 
+# Dependencies
+* Python 3
+* Python Requests (`pip3 install --user requests==2.*`)
+
 ## Potential Servers
 Below is a small list of sources for Tile Servers. Beware, some of the linked servers have restrictions on usage, zoom, and may throttle or deny service if you violate their terms. 
 

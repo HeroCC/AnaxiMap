@@ -82,7 +82,7 @@ def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension
     image.info['tileEndX'] = tileEndX
     image.info['tileEndY'] = tileEndY
 
-    stitchedImageName = "Map" + tileExtension
+    stitchedImageName = "Map_{}-{}_{}-{}{}".format(tileStartX, tileEndX, tileStartY, tileEndY, tileExtension)
     image.save(stitchedImageName)
     print("Stitched image saved to " + os.path.abspath(stitchedImageName))
 

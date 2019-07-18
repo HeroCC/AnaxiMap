@@ -1,13 +1,11 @@
 # Anaxi Tile Downloader
 Downloads and stitches images downloaded from Map Tile servers.
 
-## Dependencies
-* Python 3
-* Python Requests (`pip3 install --user requests==2.*`)
-* Python Pillow (`pip3 install --user Pillow=6.*`) -- optional, used for image stitching
+## Installation
+Run `python setup.py install`.
 
 ## Usage
-After ensuring your dependencies are installed, you can run the program with `python3 tsdl.py`. It will prompt you for your bounding Lat and Long coordinates, zoom, and tile server URL. For best results, the larger the area you select with your lat & long, the smaller you should have your zoom. If your zoom is too big, downloading will take longer, your resulting stitched file will be larger, and the tile server may throttle / restrict your usage.
+To start AnaxiTile, run `anaxi` in your command line. It will prompt you for your bounding Lat and Long coordinates, zoom, and tile server URL. For best results, the larger the area you select with your lat & long, the smaller you should have your zoom. If your zoom is too big, downloading will take longer, your resulting stitched file will be larger, and the tile server may throttle / restrict your usage.
 
 The program will tell you the coords it rounded to (make a note of these for geolocation, they are the top right and bottom left of the generated image), and start downloading the tiles to the `tiles/` folder. 
 
@@ -16,7 +14,7 @@ After downloading all tiles, you will be asked if you'd like to stitch together 
 ## Example
 The following example will download and stitch tiles within an area of the MIT campus in Cambridge, Massachusetts.
 ```
-$ python3 tsdl.py
+$ anaxi
 Starting Anaxi Tile Downloader...
 Enter Starting Latitude: 42.363531
 Enter Starting Longitude: -71.096362

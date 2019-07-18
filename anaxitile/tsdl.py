@@ -6,8 +6,7 @@ import shutil
 
 import requests
 
-import tilenames
-
+from anaxitile import tilenames
 
 def getTileFileName(zoom, tileX, tileY, tileExtension):
     return "%d_%d_%d%s" % (zoom, tileX, tileY, tileExtension)
@@ -160,5 +159,5 @@ def main():
     return downloadErr
 
 
-if __name__ == "__main__":
-    exit(int(main()))
+def shell_invoke():
+    exit(main())

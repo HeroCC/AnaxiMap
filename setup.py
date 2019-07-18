@@ -12,5 +12,9 @@ setup(
   install_requires = [
     "requests == 2.22.0",
     "Pillow   == 6.1.0",
-  ]
+  ],
+  packages         = ["anaxitile"],
+  entry_points     = {
+      "console_scripts": "anaxi=anaxitile:shell_invoke",
+  } 
 )

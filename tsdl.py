@@ -9,6 +9,17 @@ import requests
 import tilenames
 
 
+class TileDownloadPreferences:
+    def __init__(self, latStart, lonStart, latEnd, lonEnd, zoom, tileServer, tilesDir="tiles"):
+        self.latStart = latStart
+        self.lonStart = lonStart
+        self.latEnd = latEnd
+        self.lonEnd = lonEnd
+        self.zoom = zoom
+        self.tileServer = tileServer
+        self.tilesDir = tilesDir
+
+
 def getTileFileName(zoom, tileX, tileY, tileExtension):
     return "%d_%d_%d%s" % (zoom, tileX, tileY, tileExtension)
 
@@ -89,11 +100,7 @@ def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension
     return 0
 
 
-def main():
-    print("Starting Anaxi Tile Downloader...")
-
-    tilesDir = "tiles"
-
+def interactivePromptPrefs():
     latStart = float(input("Enter Starting Latitude: "))
     lonStart = float(input("Enter Starting Longitude: "))
 
@@ -103,19 +110,17 @@ def main():
     zoom = int(input("Zoom / Level of Detail (usually 0-18, larger = more data & detail): "))
     tileServer = str(input("Tile Server URL: "))
 
-    #latStart, lonStart = 42.363531, -71.096362
-    #latEnd, lonEnd = 42.354185, -71.069741
-    #zoom = 17
-    #tileServer = "http://tile.stamen.com/terrain-background/%zoom%/%xTile%/%yTile%.jpg"
-    #tileServer = "https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png"
+    return TileDownloadPreferences(latStart, lonStart, latEnd, lonEnd, zoom, tileServer)
 
-    tileExtension = os.path.splitext(tileServer)[1]
+
+def processTileParams(prefs):
+    tileExtension = os.path.splitext(prefs.tileServer)[1]
     if tileExtension == "":
         print("The Tile Server URL must end with a file type extension (ex. .jpg, .png, etc)")
         return 3
 
-    tileStartX, tileStartY = tilenames.tileXY(latStart, lonStart, zoom, True)
-    tileEndX, tileEndY = tilenames.tileXY(latEnd, lonEnd, zoom, True)
+    tileStartX, tileStartY = tilenames.tileXY(prefs.latStart, prefs.lonStart, prefs.zoom, True)
+    tileEndX, tileEndY = tilenames.tileXY(prefs.latEnd, prefs.lonEnd, prefs.zoom, True)
 
     # Sort the numbers low to high
     if tileStartY > tileEndY:
@@ -128,8 +133,8 @@ def main():
     tileEndX, tileEndY = math.ceil(tileEndX), math.ceil(tileEndY)
 
     # S lat, W lon, N lat, E lon
-    startCornerCoords = tilenames.tileEdges(tileStartX, tileStartY, zoom)
-    endCornerCoords = tilenames.tileEdges(tileEndX, tileEndY, zoom)
+    startCornerCoords = tilenames.tileEdges(tileStartX, tileStartY, prefs.zoom)
+    endCornerCoords = tilenames.tileEdges(tileEndX, tileEndY, prefs.zoom)
 
     latStartCorner, lonStartCorner = startCornerCoords[2], startCornerCoords[1]  # Get's north-west tile start lat & lon
     latEndCorner, lonEndCorner = endCornerCoords[0], endCornerCoords[3]  # Get's south-east tile end lat & lon
@@ -142,16 +147,16 @@ def main():
 
     print("Downloading a total of", abs(tileEndX - tileStartX + 1) * abs(tileEndY - tileStartY + 1), "tiles")
 
-    if not os.path.exists(tilesDir):
-        os.mkdir(tilesDir)
+    if not os.path.exists(prefs.tilesDir):
+        os.mkdir(prefs.tilesDir)
 
-    os.chdir(tilesDir)
+    os.chdir(prefs.tilesDir)
 
-    downloadErr = downloadTiles(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileServer, tileExtension)
+    downloadErr = downloadTiles(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, prefs.tileServer, tileExtension)
     if downloadErr == 0:
         stitchResponse = input("Downloading successful! Would you like to stitch images together? (y/N) ")
         if "y" in stitchResponse:
-            stitchErr = stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension)
+            stitchErr = stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, tileExtension)
             return stitchErr
         else:
             print("Not stitching images. Goodbye!")
@@ -160,5 +165,17 @@ def main():
     return downloadErr
 
 
+def main():
+    print("Starting Anaxi Tile Downloader...")
+
+    prefs = interactivePromptPrefs()
+    #prefs = TileDownloadPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
+    #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")
+
+    #tileServer = "http://tile.stamen.com/terrain-background/%zoom%/%xTile%/%yTile%.jpg"
+
+    return processTileParams(prefs)
+
+
 if __name__ == "__main__":
-    exit(int(main()))
+    exit(main())

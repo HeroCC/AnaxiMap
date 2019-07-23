@@ -9,7 +9,7 @@ import requests
 import tilenames
 
 
-class TileDownloadPreferences:
+class AnaxiPreferences:
     def __init__(self, latStart, lonStart, latEnd, lonEnd, zoom, tileServer, tilesDir="tiles"):
         self.latStart = latStart
         self.lonStart = lonStart
@@ -20,50 +20,119 @@ class TileDownloadPreferences:
         self.tilesDir = tilesDir
 
 
-def getTileFileName(zoom, tileX, tileY, tileExtension):
-    return "%d_%d_%d%s" % (zoom, tileX, tileY, tileExtension)
+class Tile:
+    def __init__(self, zoom, x, y, tileServer):
+        self.zoom = zoom
+        self.tileX = x
+        self.tileY = y
+        self.tileServer = tileServer
+
+        self.tileServer = self.getProcessedURL()
+        self.tileExtension = getFileExtension(tileServer)
+
+    def download(self):
+        fileName = self.getFileName()
+        if self.doesTileImageFileExist():
+            print("Skipping " + fileName + ", it already exists")
+            return 200
+
+        headers = {
+            'User-Agent': 'Anaxi Open Source Tile Stitch Software'
+        }
+
+        # Tweaked from https://stackoverflow.com/a/18043472/1709894
+        print("Downloading " + self.tileServer + " to " + fileName)
+        tileRequest = requests.get(self.tileServer, stream=True, headers=headers)
+        if tileRequest.status_code == 200:
+            with open(self.getFileName(), 'wb') as tileImageFile:
+                tileRequest.raw.decode_content = True
+                shutil.copyfileobj(tileRequest.raw, tileImageFile)
+        else:
+            print("Error getting", fileName + ":", tileRequest.reason, "(" + str(tileRequest.status_code) + ")")
+
+        return tileRequest.status_code
+
+    def getProcessedURL(self):
+        return self.tileServer.replace("%zoom%", str(self.zoom)).replace("%xTile%", str(self.tileX)).replace("%yTile%", str(self.tileY))
+
+    def getFileName(self):
+        return "%d_%d_%d%s" % (self.zoom, self.tileX, self.tileY, self.tileExtension)
+
+    def doesTileImageFileExist(self):
+        return os.path.isfile(self.getFileName())
 
 
-def downloadTile(tileX, tileY, zoom, tileServer, tileExtension):
-    processedURL = tileServer.replace("%zoom%", str(zoom)).replace("%xTile%", str(tileX)).replace("%yTile%", str(tileY))
-    fileName = getTileFileName(zoom, tileX, tileY, tileExtension)
-    if os.path.isfile(fileName):
-        print("Skipping " + fileName + ", it already exists")
-        return 200
+class TileCollection:
+    def __init__(self, tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileServer):
+        self.tileServer = tileServer
+        self.tileStartX = tileStartX
+        self.tileStartY = tileStartY
+        self.tileEndX = tileEndX
+        self.tileEndY = tileEndY
+        self.zoom = zoom
 
-    headers = {
-        'User-Agent': 'Anaxi Open Source Tile Stitch Software'
-    }
+        self.tiles = []
+        for y in range(self.tileStartY, self.tileEndY + 1):
+            for x in range(self.tileStartX, self.tileEndX + 1):
+                self.tiles.append(Tile(self.zoom, x, y, self.tileServer))
 
-    # Tweaked from https://stackoverflow.com/a/18043472/1709894
-    print("Downloading " + processedURL + " to " + fileName)
-    tileRequest = requests.get(processedURL, stream=True, headers=headers)
-    if tileRequest.status_code == 200:
-        with open(fileName, 'wb') as tileImageFile:
-            tileRequest.raw.decode_content = True
-            shutil.copyfileobj(tileRequest.raw, tileImageFile)
-    else:
-        print("Error getting", fileName + ":", tileRequest.reason, "(" + str(tileRequest.status_code) + ")")
+    def downloadTiles(self):
+        for tile in self.tiles:
+            if tile.download() != 200:
+                return 1
+        return 0
 
-    return tileRequest.status_code
+    def getMaxTileSize(self):
+        maxXpx = 0
+        maxYpx = 0
+        for tile in self.tiles:
+            tileImage = Image.open(tile.getFileName())
+            if tileImage.size[0] > maxXpx:
+                print("Changing tile width to {}".format(tileImage.size[0]))
+                maxXpx = tileImage.size[0]
 
+            if tileImage.size[1] > maxYpx:
+                print("Changing tile height to {}".format(tileImage.size[1]))
+                maxYpx = tileImage.size[1]
 
-def downloadTiles(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileServer, tileExtension):
-    err = 0
-    # Add 1 to end coord to make range act inclusive
-    for y in range(tileStartY, tileEndY + 1):
-        for x in range(tileStartX, tileEndX + 1):
-            responseCode = downloadTile(x, y, zoom, tileServer, tileExtension)
-            if responseCode != 200:
-                err = 1
-                return err
-    return err
+        return maxXpx, maxYpx
 
+    def stitchImages(self):
+        checkPilInstalled()
+        tilePixelSize = self.getMaxTileSize()
 
-def checkFileExists(fileName):
-    if not os.path.isfile(fileName):
-        print("Aborting stitch, expected " + fileName + " but it wasn't found")
-        exit(2)
+        width = abs((self.tileEndX - self.tileStartX)) * tilePixelSize[0]
+        height = abs((self.tileStartY - self.tileEndY)) * tilePixelSize[1]
+
+        image = Image.new("RGB", (width, height))
+
+        for tile in self.tiles:
+            fileName = tile.getFileName()
+
+            xPastePixel = (tile.tileX - self.tileStartX) * tilePixelSize[0]
+            yPastePixel = height - (self.tileEndY - tile.tileY) * tilePixelSize[1]
+
+            tileImage = Image.open(fileName)
+
+            print("Stitching " + fileName)
+            image.paste(tileImage, (xPastePixel, yPastePixel))
+
+        image.info['tileStartX'] = self.tileStartX
+        image.info['tileStartY'] = self.tileStartY
+        image.info['tileEndX'] = self.tileEndX
+        image.info['tileEndY'] = self.tileEndY
+
+        tileExtension = promptForStitchExtension(self.tiles[0].tileExtension)
+
+        stitchedImageName = "Map_{}_{}-{}_{}-{}{}".format(self.zoom,
+                                                          self.tileStartX, self.tileEndX,
+                                                          self.tileStartY, self.tileEndY,
+                                                          tileExtension)
+        print("Saving to {}...".format(stitchedImageName))
+        image.save(stitchedImageName)
+        print("Stitched image saved to {}".format(os.path.abspath(stitchedImageName)))
+
+        return 0
 
 
 def checkPilInstalled():
@@ -75,71 +144,14 @@ def checkPilInstalled():
         raise
 
 
-def getMaxImageSize(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension):
-    maxXpx = 0
-    maxYpx = 0
-    for y in range(tileStartY, tileEndY + 1):
-        for x in range(tileStartX, tileEndX + 1):
-            fileName = getTileFileName(zoom, x, y, tileExtension)
-            checkFileExists(fileName)
-
-            tileImage = Image.open(fileName)
-            if tileImage.size[0] > maxXpx:
-                print("Changing tile width to {}".format(tileImage.size[0]))
-                maxXpx = tileImage.size[0]
-
-            if tileImage.size[1] > maxYpx:
-                print("Changing tile height to {}".format(tileImage.size[1]))
-                maxYpx = tileImage.size[1]
-
-            return maxXpx, maxYpx
-
-
 def promptForStitchExtension(defaultExtention):
     # Full supported file format list here: https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html
-    newExt = input("Would you like to manually change save format? [Blank for suggested, or .jpg, .png, .tiff, etc)")
+    newExt = input("Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]: ")
     if not newExt:
         return defaultExtention
     else:
         print("New filetype extension is '{}'".format(newExt))
         return newExt
-
-
-def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension):
-    checkPilInstalled()
-    tilePixelSize = getMaxImageSize(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension)
-
-    width = abs((tileEndX - tileStartX)) * tilePixelSize[0]
-    height = abs((tileStartY - tileEndY)) * tilePixelSize[1]
-
-    image = Image.new("RGB", (width, height))
-
-    for y in range(tileStartY, tileEndY + 1):
-        for x in range(tileStartX, tileEndX + 1):
-            fileName = getTileFileName(zoom, x, y, tileExtension)
-            checkFileExists(fileName)
-
-            xPastePixel = (x - tileStartX) * tilePixelSize[0]
-            yPastePixel = height - (tileEndY - y) * tilePixelSize[1]
-
-            tileImage = Image.open(fileName)
-
-            print("Stitching " + fileName)
-            image.paste(tileImage, (xPastePixel, yPastePixel))
-
-    image.info['tileStartX'] = tileStartX
-    image.info['tileStartY'] = tileStartY
-    image.info['tileEndX'] = tileEndX
-    image.info['tileEndY'] = tileEndY
-
-    tileExtension = promptForStitchExtension(tileExtension)
-
-    stitchedImageName = "Map_{}_{}-{}_{}-{}{}".format(zoom, tileStartX, tileEndX, tileStartY, tileEndY, tileExtension)
-    print("Saving to {}...".format(stitchedImageName))
-    image.save(stitchedImageName)
-    print("Stitched image saved to {}".format(os.path.abspath(stitchedImageName)))
-
-    return 0
 
 
 def interactivePromptPrefs():
@@ -151,16 +163,18 @@ def interactivePromptPrefs():
 
     zoom = int(input("Zoom / Level of Detail (usually 0-18, larger = more data & detail): "))
     tileServer = str(input("Tile Server URL: "))
+    while getFileExtension(tileServer) == "":
+        print("The Tile Server URL must end with a file type extension (ex. .jpg, .png, etc)")
+        tileServer = str(input("Tile Server URL: "))
 
-    return TileDownloadPreferences(latStart, lonStart, latEnd, lonEnd, zoom, tileServer)
+    return AnaxiPreferences(latStart, lonStart, latEnd, lonEnd, zoom, tileServer)
+
+
+def getFileExtension(tileServerURL):
+    return os.path.splitext(tileServerURL)[1].split("?", 1)[0]  # Remove extra URL params from extension
 
 
 def processTileParams(prefs):
-    tileExtension = os.path.splitext(prefs.tileServer)[1].split("?", 1)[0]  # Remove extra URL params from extension
-    if tileExtension == "":
-        print("The Tile Server URL must end with a file type extension (ex. .jpg, .png, etc)")
-        return 3
-
     tileStartX, tileStartY = tilenames.tileXY(prefs.latStart, prefs.lonStart, prefs.zoom, True)
     tileEndX, tileEndY = tilenames.tileXY(prefs.latEnd, prefs.lonEnd, prefs.zoom, True)
 
@@ -194,11 +208,13 @@ def processTileParams(prefs):
 
     os.chdir(prefs.tilesDir)
 
-    downloadErr = downloadTiles(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, prefs.tileServer, tileExtension)
+    tiles = TileCollection(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, prefs.tileServer)
+
+    downloadErr = tiles.downloadTiles()
     if downloadErr == 0:
         stitchResponse = input("Downloading successful! Would you like to stitch images together? (y/N) ")
         if "y" in stitchResponse:
-            stitchErr = stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, tileExtension)
+            stitchErr = tiles.stitchImages()
             return stitchErr
         else:
             print("Not stitching images. Goodbye!")
@@ -211,7 +227,7 @@ def main():
     print("Starting Anaxi Tile Downloader...")
 
     prefs = interactivePromptPrefs()
-    #prefs = TileDownloadPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
+    #prefs = AnaxiPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
     #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")
 
     #prefs.tileServer = "http://tile.stamen.com/terrain-background/%zoom%/%xTile%/%yTile%.jpg"

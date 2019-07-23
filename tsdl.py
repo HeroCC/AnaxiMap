@@ -95,6 +95,16 @@ def getMaxImageSize(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtens
             return maxXpx, maxYpx
 
 
+def promptForStitchExtension(defaultExtention):
+    # Full supported file format list here: https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html
+    newExt = input("Would you like to manually change save format? [Blank for suggested, or .jpg, .png, .tiff, etc)")
+    if not newExt:
+        return defaultExtention
+    else:
+        print("New filetype extension is '{}'".format(newExt))
+        return newExt
+
+
 def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension):
     checkPilInstalled()
     tilePixelSize = getMaxImageSize(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension)
@@ -122,9 +132,12 @@ def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension
     image.info['tileEndX'] = tileEndX
     image.info['tileEndY'] = tileEndY
 
+    tileExtension = promptForStitchExtension(tileExtension)
+
     stitchedImageName = "Map_{}_{}-{}_{}-{}{}".format(zoom, tileStartX, tileEndX, tileStartY, tileEndY, tileExtension)
+    print("Saving to {}...".format(stitchedImageName))
     image.save(stitchedImageName)
-    print("Stitched image saved to " + os.path.abspath(stitchedImageName))
+    print("Stitched image saved to {}".format(os.path.abspath(stitchedImageName)))
 
     return 0
 
@@ -202,6 +215,7 @@ def main():
     #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")
 
     #prefs.tileServer = "http://tile.stamen.com/terrain-background/%zoom%/%xTile%/%yTile%.jpg"
+    #prefs.tileServer = "https://api.maptiler.com/maps/hybrid/256/%zoom%/%xTile%/%yTile%.jpg?key={}".format(os.getenv("MAPTILER"))
 
     return processTileParams(prefs)
 

@@ -85,6 +85,11 @@ def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension
             yPastePixel = height - (tileEndY - y) * tilePixelSize
 
             tileImage = Image.open(fileName)
+
+            if tileImage.size != (tilePixelSize, tilePixelSize):
+                print("Tile {} is not {}px by {}px, unable to stitch".format(fileName, tilePixelSize, tilePixelSize))
+                return 4
+
             print("Stitching " + fileName)
             image.paste(tileImage, (xPastePixel, yPastePixel))
 
@@ -114,7 +119,7 @@ def interactivePromptPrefs():
 
 
 def processTileParams(prefs):
-    tileExtension = os.path.splitext(prefs.tileServer)[1]
+    tileExtension = os.path.splitext(prefs.tileServer)[1].split("?", 1)[0]  # Remove extra URL params from extension
     if tileExtension == "":
         print("The Tile Server URL must end with a file type extension (ex. .jpg, .png, etc)")
         return 3
@@ -172,7 +177,7 @@ def main():
     #prefs = TileDownloadPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
     #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")
 
-    #tileServer = "http://tile.stamen.com/terrain-background/%zoom%/%xTile%/%yTile%.jpg"
+    #prefs.tileServer = "http://tile.stamen.com/terrain-background/%zoom%/%xTile%/%yTile%.jpg"
 
     return processTileParams(prefs)
 

@@ -73,10 +73,6 @@ def mercatorToLat(mercatorY):
     return (degrees(atan(sinh(mercatorY))))
 
 
-def tileSizePixels():
-    return (256)
-
-
 def tileLayerBase(layer):
     layers = { \
         "tah": "http://cassini.toolserver.org:8080/http://a.tile.openstreetmap.org/+http://toolserver.org/~cmarqu/hill/",

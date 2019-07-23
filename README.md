@@ -7,7 +7,7 @@ Downloads and stitches images downloaded from Map Tile servers.
 * Python Pillow (`pip3 install --user Pillow=6.*`) -- optional, used for image stitching
 
 ## Usage
-After ensuring your dependencies are installed, you can run the program with `python3 tsdl.py`. It will prompt you for your bounding Lat and Long coordinates, zoom, and tile server URL. For best results, the larger the area you select with your lat & long, the smaller you should have your zoom. If your zoom is too big, downloading will take longer, your resulting stitched file will be larger, and the tile server may throttle / restrict your usage.
+After ensuring your dependencies are installed, you can run the program with `python3 tsdl.py`. It will prompt you for your bounding Lat and Long coordinates, zoom, and tile server URL. For best results, the larger the area you select with your lat & long, the smaller you should have your zoom. If your zoom is too big, downloading will take longer, your resulting stitched file will be larger, and the tile server may throttle / restrict your usage. See this [OpenStreetMap Wiki page](https://wiki.openstreetmap.org/wiki/Zoom_levels) for scaling and examples.
 
 The program will tell you the coords it rounded to (make a note of these for geolocation, they are the top right and bottom left of the generated image), and start downloading the tiles to the `tiles/` folder. 
 
@@ -41,7 +41,7 @@ Stitching 14_4957_6059.png
 Stitching 14_4958_6059.png
 Stitching 14_4956_6060.png
 ...
-Stitched image saved to tiles/Map_4956-4958_6059-6061.png
+Stitched image saved to tiles/Map_14_4956-4958_6059-6061.png
 ```
 
 ## Potential Servers

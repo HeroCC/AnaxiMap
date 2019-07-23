@@ -60,35 +60,59 @@ def downloadTiles(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileServer, 
     return err
 
 
-def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension):
+def checkFileExists(fileName):
+    if not os.path.isfile(fileName):
+        print("Aborting stitch, expected " + fileName + " but it wasn't found")
+        exit(2)
+
+
+def checkPilInstalled():
     try:
+        global Image
         from PIL import Image
-    except ImportError:
-        print("Stitching images requires the Pillow library")
+    except (ImportError, ModuleNotFoundError) as e:
+        print("ERROR: Stitching images requires the Pillow library")
         raise
 
-    tilePixelSize = tilenames.tileSizePixels()
 
-    width = abs((tileEndX - tileStartX)) * tilePixelSize
-    height = abs((tileStartY - tileEndY)) * tilePixelSize
+def getMaxImageSize(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension):
+    maxXpx = 0
+    maxYpx = 0
+    for y in range(tileStartY, tileEndY + 1):
+        for x in range(tileStartX, tileEndX + 1):
+            fileName = getTileFileName(zoom, x, y, tileExtension)
+            checkFileExists(fileName)
+
+            tileImage = Image.open(fileName)
+            if tileImage.size[0] > maxXpx:
+                print("Changing tile width to {}".format(tileImage.size[0]))
+                maxXpx = tileImage.size[0]
+
+            if tileImage.size[1] > maxYpx:
+                print("Changing tile height to {}".format(tileImage.size[1]))
+                maxYpx = tileImage.size[1]
+
+            return maxXpx, maxYpx
+
+
+def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension):
+    checkPilInstalled()
+    tilePixelSize = getMaxImageSize(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension)
+
+    width = abs((tileEndX - tileStartX)) * tilePixelSize[0]
+    height = abs((tileStartY - tileEndY)) * tilePixelSize[1]
 
     image = Image.new("RGB", (width, height))
 
     for y in range(tileStartY, tileEndY + 1):
         for x in range(tileStartX, tileEndX + 1):
             fileName = getTileFileName(zoom, x, y, tileExtension)
-            if not os.path.isfile(fileName):
-                print("Aborting stitch, expected " + fileName + " but it wasn't found")
-                return 2
+            checkFileExists(fileName)
 
-            xPastePixel = (x - tileStartX) * tilePixelSize
-            yPastePixel = height - (tileEndY - y) * tilePixelSize
+            xPastePixel = (x - tileStartX) * tilePixelSize[0]
+            yPastePixel = height - (tileEndY - y) * tilePixelSize[1]
 
             tileImage = Image.open(fileName)
-
-            if tileImage.size != (tilePixelSize, tilePixelSize):
-                print("Tile {} is not {}px by {}px, unable to stitch".format(fileName, tilePixelSize, tilePixelSize))
-                return 4
 
             print("Stitching " + fileName)
             image.paste(tileImage, (xPastePixel, yPastePixel))
@@ -98,7 +122,7 @@ def stitchImages(tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileExtension
     image.info['tileEndX'] = tileEndX
     image.info['tileEndY'] = tileEndY
 
-    stitchedImageName = "Map_{}-{}_{}-{}{}".format(tileStartX, tileEndX, tileStartY, tileEndY, tileExtension)
+    stitchedImageName = "Map_{}_{}-{}_{}-{}{}".format(zoom, tileStartX, tileEndX, tileStartY, tileEndY, tileExtension)
     image.save(stitchedImageName)
     print("Stitched image saved to " + os.path.abspath(stitchedImageName))
 

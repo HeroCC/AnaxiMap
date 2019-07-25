@@ -58,6 +58,8 @@ Enter Starting Longitude: -71.096362
 Enter Ending Latitude: 42.354185
 Enter Ending Longitude: -71.069741
 Zoom / Level of Detail (usually 0-18, larger = more data & detail): 16
+Would you like to stitch images together? (Y/n) y
+Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]:
 Tile Server URL: https://b.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
 Starting at North-West corner: [42.366661663732735, -71.0980224609375]
 Ending at South-East corner: [42.34636533160188, -71.0595703125]
@@ -68,7 +70,10 @@ Downloading https://b.tile.openstreetmap.org/16/19825/24238.png to 16_19825_2423
 Downloading https://b.tile.openstreetmap.org/16/19826/24238.png to 16_19826_24238.png
 Downloading https://b.tile.openstreetmap.org/16/19827/24238.png to 16_19827_24238.png
 ...
-Downloading successful! Would you like to stitch images together? (Y/n) y
+Download Complete!
+Stitching images...
+Changing tile width to 256
+Changing tile height to 256
 Stitching 16_19829_24242.png
 Stitching 16_19830_24242.png
 Stitching 16_19831_24242.png

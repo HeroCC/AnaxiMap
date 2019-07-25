@@ -151,17 +151,6 @@ def checkPilInstalled():
         raise
 
 
-def promptForStitchExtension(defaultExtention):
-    # Full supported file format list here: https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html
-    # To get from code: list(set(Image.registered_extensions().values())
-    newExt = input("Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]: ")
-    if not newExt:
-        return defaultExtention
-    else:
-        print("New filetype extension is '{}'".format(newExt))
-        return newExt
-
-
 def interactivePromptPrefs():
     latStart = float(input("Enter Starting Latitude: "))
     lonStart = float(input("Enter Starting Longitude: "))
@@ -171,11 +160,21 @@ def interactivePromptPrefs():
 
     zoom = int(input("Zoom / Level of Detail (usually 0-18, larger = more data & detail): "))
     tileServer = str(input("Tile Server URL: "))
-    while getFileExtension(tileServer) == "":
-        print("The Tile Server URL must end with a file type extension (ex. .jpg, .png, etc)")
-        tileServer = str(input("Tile Server URL: "))
 
-    return AnaxiPreferences(latStart, lonStart, latEnd, lonEnd, zoom, tileServer)
+    prefs = AnaxiPreferences(latStart, lonStart, latEnd, lonEnd, zoom, tileServer, interactive=True)
+
+    stitch = str(input("Would you like to stitch images together after downloading? (Y/n) ")).lower()
+    if stitch.startswith("y") or not stitch.strip():
+        prefs.noStitch = False
+
+        # Full supported file format list here: https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html
+        # To get from code: list(set(Image.registered_extensions().values())
+        prefs.stitchFormat = str(input("Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]: ")).strip()
+    else:
+        print("Not stitching tiles")
+        prefs.noStitch = True
+
+    return prefs
 
 
 def commandLinePrefsParse():
@@ -192,8 +191,8 @@ def commandLinePrefsParse():
     parser.add_argument('--noStitch', action='store_true', help="Don't stitch tiles together")
 
     args = parser.parse_args()
-    return AnaxiPreferences(args.latStart, args.lonStart, args.latEnd, args.lonEnd,
-                            args.zoom, args.tileServer, args.tilesDir, args.stitchFormat, noStitch=args.noStitch)
+    return AnaxiPreferences(args.latStart, args.lonStart, args.latEnd, args.lonEnd, args.zoom, args.tileServer,
+                            args.tilesDir, args.stitchFormat, noStitch=args.noStitch, interactive=False)
 
 
 def getFileExtension(tileServerURL):
@@ -239,19 +238,8 @@ def processTileParams(prefs):
     downloadErr = tileCol.downloadTiles()
     if downloadErr == 0:
         print("Download Complete!")
-        if prefs.interactive:
-            stitchResponse = input("Downloading successful! Would you like to stitch images together? (Y/n) ")
-            if "n" not in stitchResponse:
-                if not prefs.stitchFormat:
-                    prefs.stitchFormat = promptForStitchExtension(tileCol.tiles[0].tileExtension)
-                return tileCol.stitchImages(prefs.stitchFormat)
-            else:
-                print("Not stitching images. Goodbye!")
-                return downloadErr
-        elif not prefs.noStitch:
+        if not prefs.noStitch:
             print("Stitching images...")
-            if not prefs.stitchFormat:
-                prefs.stitchFormat = tileCol.tiles[0].tileExtension
             return tileCol.stitchImages(prefs.stitchFormat)
 
     return downloadErr
@@ -260,13 +248,14 @@ def processTileParams(prefs):
 def main():
     print("Starting Anaxi Tile Downloader...")
 
-    prefs = None
     if len(sys.argv) > 1:
         prefs = commandLinePrefsParse()
-        prefs.interactive = False
     else:
         prefs = interactivePromptPrefs()
-        prefs.interactive = True
+
+    if not getFileExtension(prefs.tileServer):
+        print("The Tile Server URL must end with a file type extension (ex. .jpg, .png, etc)")
+        return 10
 
     #prefs = AnaxiPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
     #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")

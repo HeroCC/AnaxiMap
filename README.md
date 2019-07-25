@@ -2,6 +2,8 @@
 Downloads and stitches images downloaded from Map Tile servers.
 
 ## Dependencies
+Assuming you have Python 3 installed and in your `$PATH`, you can run `pip3 install -r requirements.txt` and all required dependencies will be installed. For best results, use a [VirtualEnv](https://virtualenv.pypa.io/en/stable/userguide/#). If you'd prefer not to use requirements.txt, the manual install instructions are below.
+
 * Python 3
 * Python Requests (`pip3 install --user requests==2.*`)
 * Python Pillow (`pip3 install --user Pillow=6.*`) -- optional, used for image stitching
@@ -22,26 +24,25 @@ Enter Starting Latitude: 42.363531
 Enter Starting Longitude: -71.096362
 Enter Ending Latitude: 42.354185
 Enter Ending Longitude: -71.069741
-Zoom / Level of Detail (usually 0-18, larger = more data & detail): 14
+Zoom / Level of Detail (usually 0-18, larger = more data & detail): 16
 Tile Server URL: https://b.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
-Starting at North-West corner: [42.37477836111418, -71.103515625]
-Ending at South-East corner: [42.32606244456203, -71.03759765625]
-Downloading X tiles 4956 through 4958
-Downloading Y tiles 6059 through 6061
-Downloading a total of 9 tiles
-Skipping 14_4956_6059.png, it already exists
-Skipping 14_4957_6059.png, it already exists
-Downloading https://b.tile.openstreetmap.org/14/4958/6059.png to 14_4958_6059.png
-Downloading https://b.tile.openstreetmap.org/14/4958/6060.png to 14_4958_6060.png
-Downloading https://b.tile.openstreetmap.org/14/4958/6061.png to 14_4958_6061.png
+Starting at North-West corner: [42.366661663732735, -71.0980224609375]
+Ending at South-East corner: [42.34636533160188, -71.0595703125]
+Downloading X tiles 19825 through 19831
+Downloading Y tiles 24238 through 24242
+Downloading a total of 35 tiles
+Downloading https://b.tile.openstreetmap.org/16/19825/24238.png to 16_19825_24238.png
+Downloading https://b.tile.openstreetmap.org/16/19826/24238.png to 16_19826_24238.png
+Downloading https://b.tile.openstreetmap.org/16/19827/24238.png to 16_19827_24238.png
 ...
 Downloading successful! Would you like to stitch images together? (y/N) y
-Stitching 14_4956_6059.png
-Stitching 14_4957_6059.png
-Stitching 14_4958_6059.png
-Stitching 14_4956_6060.png
+Stitching 16_19829_24242.png
+Stitching 16_19830_24242.png
+Stitching 16_19831_24242.png
 ...
-Stitched image saved to tiles/Map_14_4956-4958_6059-6061.png
+Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]: 
+Saving to Map_16_19825-19831_24238-24242.png...
+Stitched image saved to /Users/conlanc/TSdl/tiles/Map_16_19825-19831_24238-24242.png
 ```
 
 ## Potential Servers

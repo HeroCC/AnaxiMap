@@ -12,7 +12,8 @@ import tilenames
 
 
 class AnaxiPreferences:
-    def __init__(self, latStart, lonStart, latEnd, lonEnd, zoom, tileServer, tilesDir="tiles"):
+    def __init__(self, latStart, lonStart, latEnd, lonEnd, zoom, tileServer,
+                 tilesDir="tiles", stitchFormat="", noStitch=False, interactive=True):
         self.latStart = latStart
         self.lonStart = lonStart
         self.latEnd = latEnd
@@ -20,6 +21,9 @@ class AnaxiPreferences:
         self.zoom = zoom
         self.tileServer = tileServer
         self.tilesDir = tilesDir
+        self.stitchFormat = stitchFormat
+        self.noStitch = noStitch
+        self.interactive = interactive
 
 
 class Tile:
@@ -99,7 +103,7 @@ class TileCollection:
 
         return maxXpx, maxYpx
 
-    def stitchImages(self):
+    def stitchImages(self, stitchSaveFormat=""):
         checkPilInstalled()
         tilePixelSize = self.getMaxTileSize()
 
@@ -124,12 +128,13 @@ class TileCollection:
         image.info['tileEndX'] = self.tileEndX
         image.info['tileEndY'] = self.tileEndY
 
-        tileExtension = promptForStitchExtension(self.tiles[0].tileExtension)
+        if not stitchSaveFormat:
+            stitchSaveFormat = self.tiles[0].tileExtension
 
         stitchedImageName = "Map_{}_{}-{}_{}-{}{}".format(self.zoom,
                                                           self.tileStartX, self.tileEndX,
                                                           self.tileStartY, self.tileEndY,
-                                                          tileExtension)
+                                                          stitchSaveFormat)
         print("Saving to {}...".format(stitchedImageName))
         image.save(stitchedImageName)
         print("Stitched image saved to {}".format(os.path.abspath(stitchedImageName)))
@@ -148,6 +153,7 @@ def checkPilInstalled():
 
 def promptForStitchExtension(defaultExtention):
     # Full supported file format list here: https://pillow.readthedocs.io/en/stable/handbook/image-file-formats.html
+    # To get from code: list(set(Image.registered_extensions().values())
     newExt = input("Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]: ")
     if not newExt:
         return defaultExtention
@@ -174,21 +180,24 @@ def interactivePromptPrefs():
 
 def commandLinePrefsParse():
     parser = argparse.ArgumentParser(description="Download and stitch tile images from GIS Tile Servers")
-    coordsGroup = parser.add_argument_group('coords')
-    coordsGroup.add_argument('latStart', nargs=1, type=float)
-    coordsGroup.add_argument('lonStart', nargs=1, type=float)
-    coordsGroup.add_argument('latEnd', nargs=1, type=float)
-    coordsGroup.add_argument('lonEnd', nargs=1, type=float)
-    parser.add_argument('zoom', nargs=1, type=int)
-    parser.add_argument('tileServer', nargs=1, type=str)
+    coordsGroup = parser  # parser.add_argument_group('coords')
+    coordsGroup.add_argument('latStart', type=float, help="Starting Latitude Coordinate")
+    coordsGroup.add_argument('lonStart', type=float, help="Starting Longitude Coordinate")
+    coordsGroup.add_argument('latEnd', type=float, help="Ending Latitude Coordinate")
+    coordsGroup.add_argument('lonEnd', type=float, help="Ending Longitude Coordinate")
+    parser.add_argument('zoom', type=int, help="Level of Zoom / Detail (more zoom + large area = huge image)")
+    parser.add_argument('tileServer', type=str, help="URL of the Tile Server to download from")
+    parser.add_argument('--tilesDir', type=str, default="tiles", help="Where to save tiles / Map")
+    parser.add_argument('--stitchFormat', type=str, default="", help="Format to save stitched Map as")
+    parser.add_argument('--noStitch', action='store_true', help="Don't stitch tiles together")
 
     args = parser.parse_args()
-    return AnaxiPreferences(args.latStart[0], args.lonStart[0], args.latEnd[0], args.lonEnd[0],
-                            args.zoom[0], args.tileServer[0])
+    return AnaxiPreferences(args.latStart, args.lonStart, args.latEnd, args.lonEnd,
+                            args.zoom, args.tileServer, args.tilesDir, args.stitchFormat, noStitch=args.noStitch)
 
 
 def getFileExtension(tileServerURL):
-    return os.path.splitext(tileServerURL)[1].split("?", 1)[0]  # Remove extra URL params from extension
+    return str(os.path.splitext(tileServerURL)[1].split("?", 1)[0])  # Remove extra URL params from extension
 
 
 def processTileParams(prefs):
@@ -225,17 +234,25 @@ def processTileParams(prefs):
 
     os.chdir(prefs.tilesDir)
 
-    tiles = TileCollection(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, prefs.tileServer)
+    tileCol = TileCollection(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, prefs.tileServer)
 
-    downloadErr = tiles.downloadTiles()
+    downloadErr = tileCol.downloadTiles()
     if downloadErr == 0:
-        stitchResponse = input("Downloading successful! Would you like to stitch images together? (y/N) ")
-        if "y" in stitchResponse:
-            stitchErr = tiles.stitchImages()
-            return stitchErr
-        else:
-            print("Not stitching images. Goodbye!")
-            return downloadErr
+        print("Download Complete!")
+        if prefs.interactive:
+            stitchResponse = input("Downloading successful! Would you like to stitch images together? (Y/n) ")
+            if "n" not in stitchResponse:
+                if not prefs.stitchFormat:
+                    prefs.stitchFormat = promptForStitchExtension(tileCol.tiles[0].tileExtension)
+                return tileCol.stitchImages(prefs.stitchFormat)
+            else:
+                print("Not stitching images. Goodbye!")
+                return downloadErr
+        elif not prefs.noStitch:
+            print("Stitching images...")
+            if not prefs.stitchFormat:
+                prefs.stitchFormat = tileCol.tiles[0].tileExtension
+            return tileCol.stitchImages(prefs.stitchFormat)
 
     return downloadErr
 
@@ -246,8 +263,10 @@ def main():
     prefs = None
     if len(sys.argv) > 1:
         prefs = commandLinePrefsParse()
+        prefs.interactive = False
     else:
         prefs = interactivePromptPrefs()
+        prefs.interactive = True
 
     #prefs = AnaxiPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
     #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")

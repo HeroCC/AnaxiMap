@@ -17,6 +17,39 @@ After downloading all tiles, you will be asked if you'd like to stitch together 
 
 ## Example
 The following example will download and stitch tiles within an area of the MIT campus in Cambridge, Massachusetts.
+
+### Command line format
+```
+$ # Command-line format
+$ python3 tsdl.py -h
+Starting Anaxi Tile Downloader...
+usage: tsdl.py [-h] [--tilesDir TILESDIR] [--stitchFormat STITCHFORMAT]
+               [--noStitch]
+               latStart lonStart latEnd lonEnd zoom tileServer
+
+Download and stitch tile images from GIS Tile Servers
+
+positional arguments:
+  latStart              Starting Latitude Coordinate
+  lonStart              Starting Longitude Coordinate
+  latEnd                Ending Latitude Coordinate
+  lonEnd                Ending Longitude Coordinate
+  zoom                  Level of Zoom / Detail (more zoom + large area = huge
+                        image)
+  tileServer            URL of the Tile Server to download from
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --tilesDir TILESDIR   Where to save tiles / Map
+  --stitchFormat STITCHFORMAT
+                        Format to save stitched Map as
+  --noStitch            Don't stitch tiles together
+
+$ python3 tsdl.py 42.363531 -71.096362 42.354185 -71.069741 17 https://b.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
+
+```
+
+### Interactive Format
 ```
 $ python3 tsdl.py
 Starting Anaxi Tile Downloader...
@@ -35,7 +68,7 @@ Downloading https://b.tile.openstreetmap.org/16/19825/24238.png to 16_19825_2423
 Downloading https://b.tile.openstreetmap.org/16/19826/24238.png to 16_19826_24238.png
 Downloading https://b.tile.openstreetmap.org/16/19827/24238.png to 16_19827_24238.png
 ...
-Downloading successful! Would you like to stitch images together? (y/N) y
+Downloading successful! Would you like to stitch images together? (Y/n) y
 Stitching 16_19829_24242.png
 Stitching 16_19830_24242.png
 Stitching 16_19831_24242.png

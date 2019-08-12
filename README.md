@@ -83,7 +83,7 @@ Stitched image saved to /Users/conlanc/TSdl/tiles/Map_16_19825-19831_24238-24242
 ```
 
 ## Potential Servers
-Anaxi supports a number of tile servers out-of-the-box. You can find a full list of supported servers by running with the argument `--printSourcesAndExit`. To use them, pass their ID in place of the Tile Server URL when asked.
+Anaxi supports a number of tile servers out-of-the-box. You can find a full list of supported servers by running with the argument `--printSourcesAndExit`. To use them, pass their ID in place of the Tile Server URL when asked. I personally like MapTiler Cloud, Google Satellite Hybrid, and OpenStreetMap the best, though you should try several or look at the [link below](#see-also) for samples and see which you like the best.
 
 Below is a small list of sources for Tile Servers. Beware, some of the linked servers have restrictions on usage, zoom, and may throttle or deny service if you violate their terms. 
 

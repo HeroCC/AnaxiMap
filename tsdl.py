@@ -88,15 +88,32 @@ class TileCollection:
         self.zoom = zoom
 
         self.tiles = []
+        self.__regenTiles()
+
+    def downloadTiles(self, forceDownload=False):
+        error = 0
+        if not getFileExtension(self.tileServer) and not forceDownload:
+            tile = self.tiles[0]
+            tile.download()
+            print("Guessing future tile extensions will be", tile.tileExtension + ". Pass --forceDownload to bypass")
+            self.tileServer += tile.tileExtension
+            self.__regenTiles()
+
+        for tile in self.tiles:
+            if tile.download(forceDownload) != 200:
+                if forceDownload:
+                    # Ignore errors, continue downloading, pass it on later
+                    error = 1
+                else:
+                    return 1
+
+        return error
+
+    def __regenTiles(self):
+        self.tiles = []
         for y in range(self.tileStartY, self.tileEndY + 1):
             for x in range(self.tileStartX, self.tileEndX + 1):
                 self.tiles.append(Tile(self.zoom, x, y, self.tileServer))
-
-    def downloadTiles(self, forceDownload=False):
-        for tile in self.tiles:
-            if tile.download(forceDownload) != 200:
-                return 1
-        return 0
 
     def getMaxTileSize(self):
         maxXpx = 0
@@ -341,8 +358,7 @@ def main():
 
     if not getFileExtension(prefs.tileServer):
         print("WARNING: The source you've given does not have a filetype extension. "
-              "We will do our best to guess, though this sometimes fails. "
-              "Skipping already downloaded images is not supported. \n")
+              "We will do our best to guess, though this sometimes fails. \n")
 
     #prefs = AnaxiPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
     #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")

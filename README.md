@@ -45,7 +45,7 @@ optional arguments:
                         Format to save stitched Map as
   --noStitch            Don't stitch tiles together
 
-$ python3 tsdl.py 42.363531 -71.096362 42.354185 -71.069741 17 https://b.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
+$ python3 tsdl.py 42.363531 -71.096362 42.354185 -71.069741 17 https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
 ```
 
 ### Interactive Format
@@ -59,7 +59,7 @@ Enter Ending Longitude: -71.069741
 Zoom / Level of Detail (usually 0-18, larger = more data & detail): 16
 Would you like to stitch images together? (Y/n) y
 Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]:
-Tile Server URL: https://b.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
+Tile Server URL: https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
 Starting at North-West corner: [42.366661663732735, -71.0980224609375]
 Ending at South-East corner: [42.34636533160188, -71.0595703125]
 Downloading X tiles 19825 through 19831
@@ -87,7 +87,7 @@ Anaxi supports a number of tile servers out-of-the-box. You can find a full list
 
 Below is a small list of sources for Tile Servers. Beware, some of the linked servers have restrictions on usage, zoom, and may throttle or deny service if you violate their terms. 
 
-To format the URL correctly, replace the zoom, x tile, and y tile spot with %zoom%, %xTile%, and %yTile% respectively. Ensure that the URL ends in a file extension (usually .jpg for satellite / terrain maps and .png for others), and that the tile server returns images that are 256px by 256px. You should have something that looks like this: `https://b.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png` 
+To format the URL correctly, replace the zoom, x tile, and y tile spot with %zoom%, %xTile%, and %yTile% respectively. Ensure that the URL ends in a file extension (usually .jpg for satellite / terrain maps and .png for others), and that the tile server returns images that are 256px by 256px. You should have something that looks like this: `https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png` 
 
 * [Index of many TMS Servers](https://qms.nextgis.com/)
 * [MapTiler Cloud](https://cloud.maptiler.com/maps/) (free account for non-commercial use)

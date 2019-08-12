@@ -115,6 +115,12 @@ class TileCollection:
             for x in range(self.tileStartX, self.tileEndX + 1):
                 self.tiles.append(Tile(self.zoom, x, y, self.tileServer))
 
+    def getMapName(self, stitchSaveFormat=""):
+        if not stitchSaveFormat:
+            stitchSaveFormat = self.tiles[0].tileExtension
+
+        return "Map_{}_{}-{}_{}-{}{}".format(self.zoom, self.tileStartX, self.tileEndX, self.tileStartY, self.tileEndY, stitchSaveFormat)
+
     def getMaxTileSize(self):
         maxXpx = 0
         maxYpx = 0
@@ -155,13 +161,7 @@ class TileCollection:
         image.info['tileEndX'] = self.tileEndX
         image.info['tileEndY'] = self.tileEndY
 
-        if not stitchSaveFormat:
-            stitchSaveFormat = self.tiles[0].tileExtension
-
-        stitchedImageName = "Map_{}_{}-{}_{}-{}{}".format(self.zoom,
-                                                          self.tileStartX, self.tileEndX,
-                                                          self.tileStartY, self.tileEndY,
-                                                          stitchSaveFormat)
+        stitchedImageName = self.getMapName(stitchSaveFormat)
         print("Saving to {}...".format(stitchedImageName))
         image.save(stitchedImageName)
         print("Stitched image saved to {}".format(os.path.abspath(stitchedImageName)))
@@ -288,6 +288,29 @@ def getFileExtension(tileServerURL):
     return str(os.path.splitext(tileServerURL)[1].split("?", 1)[0])  # Remove extra URL params from extension
 
 
+def genInfoFile(tileCollection):
+    infoFileName = tileCollection.getMapName() + ".info"
+    print("Writing info file to", infoFileName)
+
+    # S lat, W lon, N lat, E lon
+    startCornerCoords = tilenames.tileEdges(tileCollection.tileStartX, tileCollection.tileStartY, tileCollection.zoom)
+    endCornerCoords = tilenames.tileEdges(tileCollection.tileEndX, tileCollection.tileEndY, tileCollection.zoom)
+
+    latStartCorner, lonStartCorner = startCornerCoords[2], startCornerCoords[1]  # Get's north-west tile start lat & lon
+    latEndCorner, lonEndCorner = endCornerCoords[0], endCornerCoords[3]  # Get's south-east tile end lat & lon
+
+    infoFile = open(infoFileName, "w")
+    print("// Generated with Anaxi Tile Downloader", file=infoFile)
+    print("lat_north=", latStartCorner, file=infoFile)
+    print("lat_south=", latEndCorner, file=infoFile)
+    print("lon_east=", lonEndCorner, file=infoFile)
+    print("lon_west=", lonStartCorner, file=infoFile)
+    print("tileStartX=", tileCollection.tileStartX, file=infoFile)
+    print("tileStartY=", tileCollection.tileStartY, file=infoFile)
+    print("tileEndX=", tileCollection.tileEndX, file=infoFile)
+    print("tileEndY=", tileCollection.tileEndY, file=infoFile)
+
+
 def processTileParams(prefs):
     tileStartX, tileStartY = tilenames.tileXY(prefs.latStart, prefs.lonStart, prefs.zoom, True)
     tileEndX, tileEndY = tilenames.tileXY(prefs.latEnd, prefs.lonEnd, prefs.zoom, True)
@@ -329,7 +352,8 @@ def processTileParams(prefs):
         print("Download Complete!")
         if not prefs.noStitch:
             print("Stitching images...")
-            return tileCol.stitchImages(prefs.stitchFormat)
+            if tileCol.stitchImages(prefs.stitchFormat) == 0:
+                return genInfoFile(tileCol)
 
     return downloadErr
 

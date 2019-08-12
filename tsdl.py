@@ -324,7 +324,7 @@ def processTileParams(prefs):
 
     tileCol = TileCollection(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, prefs.tileServer)
 
-    downloadErr = tileCol.downloadTiles()
+    downloadErr = tileCol.downloadTiles(prefs.forceDownload)
     if downloadErr == 0:
         print("Download Complete!")
         if not prefs.noStitch:

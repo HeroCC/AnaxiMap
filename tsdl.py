@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 # Anaximander Map Tile Downloader
-# TODO Gen Info file
 import argparse
 import math
 import os

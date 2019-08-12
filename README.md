@@ -83,12 +83,26 @@ Stitched image saved to /Users/conlanc/TSdl/tiles/Map_16_19825-19831_24238-24242
 ```
 
 ## Potential Servers
+Anaxi supports a number of tile servers out-of-the-box. You can find a full list of supported servers by running with the argument `--printSourcesAndExit`. To use them, pass their ID in place of the Tile Server URL when asked.
+
 Below is a small list of sources for Tile Servers. Beware, some of the linked servers have restrictions on usage, zoom, and may throttle or deny service if you violate their terms. 
 
 To format the URL correctly, replace the zoom, x tile, and y tile spot with %zoom%, %xTile%, and %yTile% respectively. Ensure that the URL ends in a file extension (usually .jpg for satellite / terrain maps and .png for others), and that the tile server returns images that are 256px by 256px. You should have something that looks like this: `https://b.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png` 
 
+* [Index of many TMS Servers](https://qms.nextgis.com/)
 * [MapTiler Cloud](https://cloud.maptiler.com/maps/) (free account for non-commercial use)
 * https://wiki.openstreetmap.org/wiki/Tile_servers
 * https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
 * https://www.trailnotes.org/FetchMap/TileServeSource.html
 * https://raw.githubusercontent.com/klakar/QGIS_resources/master/collections/Geosupportsystem/python/qgis_basemaps.py
+
+## See Also
+* [QGis: FOSS geographical information system](https://github.com/qgis/QGIS)
+* [Official Google Maps Tile API](https://developers.google.com/maps/documentation/tile/#map_tiles)
+* [Alternative Map Tile Downloader](https://wiki.openstreetmap.org/wiki/GDAL2Tiles)
+* [Samples of tiles from various sources](http://allmapsoft.com/tilesample.html)
+* [Unoficcial Google Maps Tile URL Schema](https://stackoverflow.com/a/33023651/1709894)
+* [TMS](https://wiki.openstreetmap.org/wiki/TMS) and [Slippy](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames) standards
+* https://wiki.osgeo.org/wiki/MapSlicer
+* https://github.com/nst/gmap_tiles
+

@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 # Anaximander Map Tile Downloader
+# TODO Gen Info file
 import argparse
 import math
 import os
+import random
 import shutil
 import sys
 from mimetypes import guess_extension
@@ -159,6 +161,65 @@ def checkPilInstalled():
         raise
 
 
+def getDefaultTileServers():
+    # Connections sourced, with a few tweaks, from 
+    # https://raw.githubusercontent.com/klakar/QGIS_resources/master/collections/Geosupportsystem/python/qgis_basemaps.py
+    # [sourcetype, title, authconfig, password, license, url, username, zmax, zmin]
+
+    sources = []
+    sources.append(["connections-xyz", "Google Maps", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=m&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "Google Satellite", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=s&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "Google Terrain", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=t&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "Google Terrain Hybrid", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=p&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "Google Satellite Hybrid", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=y&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "US National Map Imagery", "", "", "", "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/%zoom%/%xTile%/%yTile%", "", "16", "0"]),
+    sources.append(["connections-xyz", "Stamen Terrain", "", "", "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL", "http://tile.stamen.com/terrain/%zoom%/%xTile%/%yTile%.png", "", "20", "0"])
+    sources.append(["connections-xyz", "Stamen Toner", "", "", "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL", "http://tile.stamen.com/toner/%zoom%/%xTile%/%yTile%.png", "", "20", "0"])
+    sources.append(["connections-xyz", "Stamen Toner Light", "", "", "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL", "http://tile.stamen.com/toner-lite/%zoom%/%xTile%/%yTile%.png", "", "20", "0"])
+    sources.append(["connections-xyz", "Stamen Watercolor", "", "", "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL", "http://tile.stamen.com/watercolor/%zoom%/%xTile%/%yTile%.jpg", "", "18", "0"])
+    sources.append(["connections-xyz", "Wikimedia Map", "", "", "OpenStreetMap contributors, under ODbL", "https://maps.wikimedia.org/osm-intl/%zoom%/%xTile%/%yTile%.png", "", "20", "1"])
+    sources.append(["connections-xyz", "Wikimedia Hike Bike Map", "", "", "OpenStreetMap contributors, under ODbL", "http://tiles.wmflabs.org/hikebike/%zoom%/%xTile%/%yTile%.png", "", "17", "1"])
+    sources.append(["connections-xyz", "Esri Boundaries Places", "", "", "", "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "20", "0"])
+    sources.append(["connections-xyz", "Esri Gray (dark)", "", "", "", "http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "16", "0"])
+    sources.append(["connections-xyz", "Esri Gray (light)", "", "", "", "http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "16", "0"])
+    sources.append(["connections-xyz", "Esri National Geographic", "", "", "", "http://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "12", "0"])
+    sources.append(["connections-xyz", "Esri Ocean", "", "", "", "https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "10", "0"])
+    sources.append(["connections-xyz", "Esri Satellite", "", "", "", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "17", "0"])
+    sources.append(["connections-xyz", "Esri Standard", "", "", "", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "17", "0"])
+    sources.append(["connections-xyz", "Esri Terrain", "", "", "", "https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "13", "0"])
+    sources.append(["connections-xyz", "Esri Transportation", "", "", "", "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "20", "0"])
+    sources.append(["connections-xyz", "Esri Topo World", "", "", "", "http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "20", "0"])
+    sources.append(["connections-xyz", "OpenStreetMap Standard", "", "", "OpenStreetMap contributors, CC-BY-SA", "http://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png", "", "19", "0"])
+    sources.append(["connections-xyz", "OpenStreetMap H.O.T.", "", "", "OpenStreetMap contributors, CC-BY-SA", "http://tile.openstreetmap.fr/hot/%zoom%/%xTile%/%yTile%.png", "", "19", "0"])
+    sources.append(["connections-xyz", "OpenStreetMap Monochrome", "", "", "OpenStreetMap contributors, CC-BY-SA", "http://tiles.wmflabs.org/bw-mapnik/%zoom%/%xTile%/%yTile%.png", "", "19", "0"])
+    sources.append(["connections-xyz", "OpenTopoMap", "", "", "Kartendaten: © OpenStreetMap-Mitwirkende, SRTM | Kartendarstellung: © OpenTopoMap (CC-BY-SA)", "https://tile.opentopomap.org/%zoom%/%xTile%/%yTile%.png", "", "17", "1"])
+    sources.append(["connections-xyz", "CartoDb Dark Matter", "", "", "Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.", "http://basemaps.cartocdn.com/dark_all/%zoom%/%xTile%/%yTile%.png", "", "20", "0"])
+    sources.append(["connections-xyz", "CartoDb Positron", "", "", "Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.", "http://basemaps.cartocdn.com/light_all/%zoom%/%xTile%/%yTile%.png", "", "20", "0"])
+    return sources
+
+
+def printDefaultTileSources():
+    print("Below are some builtin tile servers. "
+          "IDs are prone to change, we recommend you use this as a reference and hardcode your URLs")
+    for i, source in enumerate(getDefaultTileServers()):
+        printDefaultSourceData(source, i)
+
+
+def printDefaultSourceData(source, i=""):
+    sourceName = source[1]
+    sourceLicense = source[4]
+    sourceURL = source[5]
+    sourceZoom = [int(source[8]), int(source[7])]
+
+    indentation = '    '
+
+    print(i, sourceName + ":")
+    print(indentation + "URL:", sourceURL)
+    print(indentation + "License:", sourceLicense)
+    print(indentation + "[Min, Max] Zoom:", sourceZoom)
+    print()
+
+
 def interactivePromptPrefs():
     latStart = float(input("Enter Starting Latitude: "))
     lonStart = float(input("Enter Starting Longitude: "))
@@ -167,7 +228,7 @@ def interactivePromptPrefs():
     lonEnd = float(input("Enter Ending Longitude: "))
 
     zoom = int(input("Zoom / Level of Detail (usually 0-18, larger = more data & detail): "))
-    tileServer = str(input("Tile Server URL: "))
+    tileServer = str(input("Tile Server URL or ID: "))
 
     prefs = AnaxiPreferences(latStart, lonStart, latEnd, lonEnd, zoom, tileServer, interactive=True)
 
@@ -186,18 +247,19 @@ def interactivePromptPrefs():
 
 
 def commandLinePrefsParse():
-    parser = argparse.ArgumentParser(description="Download and stitch tile images from GIS Tile Servers")
+    parser = argparse.ArgumentParser(description="Download and stitch tile images from GIS / TMS Tile Servers")
     coordsGroup = parser  # parser.add_argument_group('coords')
     coordsGroup.add_argument('latStart', type=float, help="Starting Latitude Coordinate")
     coordsGroup.add_argument('lonStart', type=float, help="Starting Longitude Coordinate")
     coordsGroup.add_argument('latEnd', type=float, help="Ending Latitude Coordinate")
     coordsGroup.add_argument('lonEnd', type=float, help="Ending Longitude Coordinate")
     parser.add_argument('zoom', type=int, help="Level of Zoom / Detail (more zoom + large area = huge image)")
-    parser.add_argument('tileServer', type=str, help="URL of the Tile Server to download from")
+    parser.add_argument('tileServer', type=str, help="URL (or ID) of the Tile Server to download from")
     parser.add_argument('--tilesDir', type=str, default="tiles", help="Where to save tiles / Map")
     parser.add_argument('--stitchFormat', type=str, default="", help="Format to save stitched Map as")
     parser.add_argument('--noStitch', action='store_true', help="Don't stitch tiles together")
     parser.add_argument('--forceDownload', action='store_true', help="Skip checking if files are already downloaded")
+    parser.add_argument('--printSourcesAndExit', help="Print known tile sources and exit")  # Not handled by argparse
 
     args = parser.parse_args()
     return AnaxiPreferences(args.latStart, args.lonStart, args.latEnd, args.lonEnd, args.zoom, args.tileServer,
@@ -256,17 +318,31 @@ def processTileParams(prefs):
 
 
 def main():
-    print("Starting Anaxi Tile Downloader...")
+    print("Starting Anaxi Tile Downloader... \n")
 
     if len(sys.argv) > 1:
+        if sys.argv[1] == "--printSourcesAndExit":
+            printDefaultTileSources()
+            exit(0)
+
         prefs = commandLinePrefsParse()
     else:
         prefs = interactivePromptPrefs()
 
+    try:
+        tid = int(prefs.tileServer)
+        tileSource = getDefaultTileServers()[tid]
+
+        print("Using", tileSource[1], "as Tile Server Source")
+        printDefaultSourceData(tileSource)
+        prefs.tileServer = getDefaultTileServers()[tid][5]
+    except ValueError:
+        pass
+
     if not getFileExtension(prefs.tileServer):
-        print("WARNING: The URL you passed does not have a filetype extension. "
+        print("WARNING: The source you've given does not have a filetype extension. "
               "We will do our best to guess, though this sometimes fails. "
-              "Skipping already downloaded images is not supported. ")
+              "Skipping already downloaded images is not supported. \n")
 
     #prefs = AnaxiPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
     #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")

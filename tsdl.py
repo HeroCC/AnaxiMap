@@ -5,6 +5,7 @@ import math
 import os
 import shutil
 import sys
+from mimetypes import guess_extension
 
 import requests
 
@@ -13,7 +14,7 @@ import tilenames
 
 class AnaxiPreferences:
     def __init__(self, latStart, lonStart, latEnd, lonEnd, zoom, tileServer,
-                 tilesDir="tiles", stitchFormat="", noStitch=False, interactive=True):
+                 tilesDir="tiles", stitchFormat="", noStitch=False, interactive=True, forceDownload=False):
         self.latStart = latStart
         self.lonStart = lonStart
         self.latEnd = latEnd
@@ -24,6 +25,7 @@ class AnaxiPreferences:
         self.stitchFormat = stitchFormat
         self.noStitch = noStitch
         self.interactive = interactive
+        self.forceDownload = forceDownload
 
 
 class Tile:
@@ -36,9 +38,9 @@ class Tile:
         self.tileServer = self.getProcessedURL()
         self.tileExtension = getFileExtension(tileServer)
 
-    def download(self):
+    def download(self, forceDownload=False):
         fileName = self.getFileName()
-        if self.doesTileImageFileExist():
+        if self.doesTileImageFileExist() and not forceDownload:
             print("Skipping " + fileName + ", it already exists")
             return 200
 
@@ -47,10 +49,16 @@ class Tile:
         }
 
         # Tweaked from https://stackoverflow.com/a/18043472/1709894
-        print("Downloading " + self.tileServer + " to " + fileName)
         tileRequest = requests.get(self.tileServer, stream=True, headers=headers)
         if tileRequest.status_code == 200:
+            if not self.tileExtension:
+                self.tileExtension = guess_extension(tileRequest.headers['content-type'], strict=False)
+                if self.tileExtension == ".jpe":
+                    # There is a bug in Python's Mimetypes library, fixed in later versions, that chooses .jpe for .jpg
+                    # Despite .JPG being much more recognized
+                    self.tileExtension = ".jpg"
             with open(self.getFileName(), 'wb') as tileImageFile:
+                print("Saving " + self.tileServer + " to " + self.getFileName())
                 tileRequest.raw.decode_content = True
                 shutil.copyfileobj(tileRequest.raw, tileImageFile)
         else:
@@ -82,9 +90,9 @@ class TileCollection:
             for x in range(self.tileStartX, self.tileEndX + 1):
                 self.tiles.append(Tile(self.zoom, x, y, self.tileServer))
 
-    def downloadTiles(self):
+    def downloadTiles(self, forceDownload=False):
         for tile in self.tiles:
-            if tile.download() != 200:
+            if tile.download(forceDownload) != 200:
                 return 1
         return 0
 
@@ -189,10 +197,12 @@ def commandLinePrefsParse():
     parser.add_argument('--tilesDir', type=str, default="tiles", help="Where to save tiles / Map")
     parser.add_argument('--stitchFormat', type=str, default="", help="Format to save stitched Map as")
     parser.add_argument('--noStitch', action='store_true', help="Don't stitch tiles together")
+    parser.add_argument('--forceDownload', action='store_true', help="Skip checking if files are already downloaded")
 
     args = parser.parse_args()
     return AnaxiPreferences(args.latStart, args.lonStart, args.latEnd, args.lonEnd, args.zoom, args.tileServer,
-                            args.tilesDir, args.stitchFormat, noStitch=args.noStitch, interactive=False)
+                            args.tilesDir, args.stitchFormat, interactive=False, noStitch=args.noStitch,
+                            forceDownload=args.forceDownload)
 
 
 def getFileExtension(tileServerURL):
@@ -254,8 +264,9 @@ def main():
         prefs = interactivePromptPrefs()
 
     if not getFileExtension(prefs.tileServer):
-        print("The Tile Server URL must end with a file type extension (ex. .jpg, .png, etc)")
-        return 10
+        print("WARNING: The URL you passed does not have a filetype extension. "
+              "We will do our best to guess, though this sometimes fails. "
+              "Skipping already downloaded images is not supported. ")
 
     #prefs = AnaxiPreferences(latStart=42.363531, lonStart=-71.096362, latEnd=42.354185, lonEnd=-71.069741,
     #                                zoom=17, tileServer="https://c.tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png")

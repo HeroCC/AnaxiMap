@@ -23,11 +23,13 @@ The following example will download and stitch tiles within an area of the MIT c
 $ # Command-line format
 $ python3 tsdl.py -h
 Starting Anaxi Tile Downloader...
+
 usage: tsdl.py [-h] [--tilesDir TILESDIR] [--stitchFormat STITCHFORMAT]
-               [--noStitch]
+               [--noStitch] [--forceDownload]
+               [--printSourcesAndExit]
                latStart lonStart latEnd lonEnd zoom tileServer
 
-Download and stitch tile images from GIS Tile Servers
+Download and stitch tile images from GIS / TMS Tile Servers
 
 positional arguments:
   latStart              Starting Latitude Coordinate
@@ -36,7 +38,7 @@ positional arguments:
   lonEnd                Ending Longitude Coordinate
   zoom                  Level of Zoom / Detail (more zoom + large area = huge
                         image)
-  tileServer            URL of the Tile Server to download from
+  tileServer            URL (or ID) of the Tile Server to download from
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -44,6 +46,9 @@ optional arguments:
   --stitchFormat STITCHFORMAT
                         Format to save stitched Map as
   --noStitch            Don't stitch tiles together
+  --forceDownload       Skip checking if files are already downloaded
+  --printSourcesAndExit Print known tile sources and exit
+
 
 $ python3 tsdl.py 42.363531 -71.096362 42.354185 -71.069741 17 https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
 ```

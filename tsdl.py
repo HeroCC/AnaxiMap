@@ -216,7 +216,8 @@ def getDefaultTileServers():
 
 def printDefaultTileSources():
     print("Below are some builtin tile servers. "
-          "IDs are prone to change, we recommend you use this as a reference and hardcode your URLs")
+          "IDs are prone to change, we recommend you use this as a reference and hardcode your URLs. "
+          "Use the IDs anywhere a Tile server URL can be used")
     for i, source in enumerate(getDefaultTileServers()):
         printDefaultSourceData(source, i)
 
@@ -275,7 +276,7 @@ def commandLinePrefsParse():
     parser.add_argument('--stitchFormat', type=str, default="", help="Format to save stitched Map as")
     parser.add_argument('--noStitch', action='store_true', help="Don't stitch tiles together")
     parser.add_argument('--forceDownload', action='store_true', help="Skip checking if files are already downloaded")
-    parser.add_argument('--printSourcesAndExit', help="Print known tile sources and exit")  # Not handled by argparse
+    parser.add_argument('--printSourcesAndExit', action='store_true', help="Print known tile sources and exit")  # Not handled by argparse
 
     args = parser.parse_args()
     return AnaxiPreferences(args.latStart, args.lonStart, args.latEnd, args.lonEnd, args.zoom, args.tileServer,

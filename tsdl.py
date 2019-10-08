@@ -169,6 +169,7 @@ class TileCollection:
 
         image = Image.new("RGB", (width, height))
 
+        stitchedTiles = 0
         for tile in self.tiles:
             fileName = tile.getFileName()
 
@@ -177,8 +178,9 @@ class TileCollection:
 
             tileImage = Image.open(fileName)
 
-            print("Stitching " + fileName)
             image.paste(tileImage, (xPastePixel, yPastePixel))
+            stitchedTiles += 1
+            print("Stitched [" + str(stitchedTiles), "of", str(len(self.tiles)) + "]", fileName)
 
         image.info['tileStartX'] = self.tileStartX
         image.info['tileStartY'] = self.tileStartY

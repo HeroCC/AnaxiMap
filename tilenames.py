@@ -9,6 +9,11 @@
 
 from math import *
 
+def horozontalDistance(lat, zoom):
+    # See https://wiki.openstreetmap.org/wiki/Zoom_levels
+    circOfEarth = 2 * pi * 6378137 # in meters
+    return circOfEarth * cos(lat) / pow(2, zoom)  # Divide by 8 to get dist per pixel (assuming 256-pixel tiles)
+
 
 def numTiles(z):
     return (pow(2, z))

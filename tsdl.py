@@ -346,6 +346,8 @@ def processTileParams(prefs):
 
     print("Downloading a total of", abs(tileEndX - tileStartX + 1) * abs(tileEndY - tileStartY + 1), "tiles")
 
+    print("Each tile at this zoom will be ~", str(tilenames.horozontalDistance(latStartCorner, prefs.zoom)), "meters wide")
+
     if prefs.dryRun:
         try:
             checkPilInstalled()

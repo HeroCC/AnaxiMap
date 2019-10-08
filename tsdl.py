@@ -15,7 +15,8 @@ import tilenames
 
 class AnaxiPreferences:
     def __init__(self, latStart, lonStart, latEnd, lonEnd, zoom, tileServer,
-                 tilesDir="tiles", stitchFormat="", noStitch=False, interactive=True, forceDownload=False):
+                 tilesDir="tiles", stitchFormat="", noStitch=False, interactive=True, forceDownload=False,
+                 dryRun=False):
         self.latStart = latStart
         self.lonStart = lonStart
         self.latEnd = latEnd
@@ -27,6 +28,7 @@ class AnaxiPreferences:
         self.noStitch = noStitch
         self.interactive = interactive
         self.forceDownload = forceDownload
+        self.dryRun = dryRun
 
 
 class Tile:
@@ -280,11 +282,12 @@ def commandLinePrefsParse():
     parser.add_argument('--noStitch', action='store_true', help="Don't stitch tiles together")
     parser.add_argument('--forceDownload', action='store_true', help="Skip checking if files are already downloaded")
     parser.add_argument('--printSourcesAndExit', action='store_true', help="Print known tile sources and exit")  # Not handled by argparse
+    parser.add_argument('--dryRun', action='store_true', help="Print download area, expected number of tiles and exit")
 
     args = parser.parse_args()
     return AnaxiPreferences(args.latStart, args.lonStart, args.latEnd, args.lonEnd, args.zoom, args.tileServer,
                             args.tilesDir, args.stitchFormat, interactive=False, noStitch=args.noStitch,
-                            forceDownload=args.forceDownload)
+                            forceDownload=args.forceDownload, dryRun=args.dryRun)
 
 
 def getFileExtension(tileServerURL):
@@ -342,6 +345,15 @@ def processTileParams(prefs):
     print("Downloading Y tiles", tileStartY, "through", tileEndY)
 
     print("Downloading a total of", abs(tileEndX - tileStartX + 1) * abs(tileEndY - tileStartY + 1), "tiles")
+
+    if prefs.dryRun:
+        try:
+            checkPilInstalled()
+        except (ImportError, ModuleNotFoundError) as e:
+            print("PIL is not installed, image stitching will not be supported")
+
+        print("Dry run, exiting now...")
+        return 0
 
     if not os.path.exists(prefs.tilesDir):
         os.mkdir(prefs.tilesDir)

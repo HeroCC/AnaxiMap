@@ -44,8 +44,11 @@ class Tile:
     def download(self, forceDownload=False):
         fileName = self.getFileName()
         if self.doesTileImageFileExist() and not forceDownload:
-            print("Skipping " + fileName + ", it already exists")
-            return 200
+            if self.isCorruptFile():
+                print("Cached image possibly corrupt, downloading again")
+            else:
+                print("Skipping " + fileName + ", it already exists")
+                return 200
 
         headers = {
             'User-Agent': 'Anaxi Open Source Tile Stitch Software'
@@ -76,6 +79,15 @@ class Tile:
 
     def doesTileImageFileExist(self):
         return os.path.isfile(self.getFileName())
+
+    def isCorruptFile(self):
+        if checkPilInstalled():
+            try:
+                Image.open(self.getFileName())
+            except OSError as e:
+                return True
+
+        return False  # assume not corrupt if PIL isn't installed
 
 
 class TileCollection:
@@ -141,7 +153,15 @@ class TileCollection:
         return maxXpx, maxYpx
 
     def stitchImages(self, stitchSaveFormat=""):
-        checkPilInstalled()
+        if not checkPilInstalled():
+            print("ERROR: Stitching images requires the Pillow library")
+            return 10
+
+        for tile in self.tiles:
+            if tile.isCorruptFile():
+                print(tile.getFileName(), "may be corrupt, redownloading")
+                tile.download(forceDownload=True)
+
         tilePixelSize = self.getMaxTileSize()
 
         width = abs((self.tileEndX - self.tileStartX)) * tilePixelSize[0]
@@ -174,12 +194,14 @@ class TileCollection:
 
 
 def checkPilInstalled():
+    installed = False
     try:
         global Image
         from PIL import Image
+        installed = True
     except (ImportError, ModuleNotFoundError) as e:
-        print("ERROR: Stitching images requires the Pillow library")
-        raise
+        pass
+    return installed
 
 
 def getDefaultTileServers():

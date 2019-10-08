@@ -6,10 +6,12 @@ Assuming you have Python 3 installed and in your `$PATH`, you can run `pip3 inst
 
 * Python 3
 * Python Requests (`pip3 install --user requests==2.*`)
-* Python Pillow (`pip3 install --user Pillow=6.*`) -- optional, used for image stitching
+* Python Pillow (`pip3 install --user Pillow=6.*`) -- optional, used for image stitching and corruption checking
 
 ## Usage
-After ensuring your dependencies are installed, you can run the program with `python3 tsdl.py`. It will prompt you for your bounding Lat and Long coordinates, zoom, and tile server URL. For best results, the larger the area you select with your lat & long, the smaller you should have your zoom. If your zoom is too big, downloading will take longer, your resulting stitched file will be larger, and the tile server may throttle / restrict your usage. See this [OpenStreetMap Wiki page](https://wiki.openstreetmap.org/wiki/Zoom_levels) for scaling and examples, and [this tool](https://boundingbox.klokantech.com/) to generate a bounding box (select CSV to easily grab the coords).
+After ensuring your dependencies are installed, you can run the program with `python3 tsdl.py`. It will prompt you for your bounding Lat and Long coordinates, zoom, and tile server URL. 
+
+For best results, the larger the area you select with your lat & long, the smaller you should have your zoom. If your zoom is too big, downloading will take longer, your resulting stitched file will be larger, and the tile server may throttle / restrict your usage. See this [OpenStreetMap Wiki page](https://wiki.openstreetmap.org/wiki/Zoom_levels) for scaling and examples, and [this tool](https://tools.geofabrik.de/calc "estimates file-size for bounds") to generate a bounding box.
 
 The program will tell you the coords it rounded to (make a note of these for geolocation, they are the top right and bottom left of the generated image), and start downloading the tiles to the `tiles/` folder. 
 
@@ -102,6 +104,8 @@ To format the URL correctly, replace the zoom, x tile, and y tile spot with %zoo
 * https://raw.githubusercontent.com/klakar/QGIS_resources/master/collections/Geosupportsystem/python/qgis_basemaps.py
 
 ## See Also
+* [Bounding Box generator / size estimator](https://tools.geofabrik.de/calc/)
+* [Alternate bounding box generator](https://boundingbox.klokantech.com/)
 * [QGis: FOSS geographical information system](https://github.com/qgis/QGIS)
 * [Official Google Maps Tile API](https://developers.google.com/maps/documentation/tile/#map_tiles)
 * [Alternative Map Tile Downloader](https://wiki.openstreetmap.org/wiki/GDAL2Tiles)

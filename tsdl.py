@@ -59,7 +59,6 @@ class Tile:
                     # Despite .JPG being much more recognized
                     self.tileExtension = ".jpg"
             with open(self.getFileName(), 'wb') as tileImageFile:
-                print("Saving " + self.tileServer + " to " + self.getFileName())
                 tileRequest.raw.decode_content = True
                 shutil.copyfileobj(tileRequest.raw, tileImageFile)
         else:
@@ -98,8 +97,12 @@ class TileCollection:
             self.tileServer += tile.tileExtension
             self.__regenTiles()
 
+        downloadedTiles = 0
         for tile in self.tiles:
-            if tile.download(forceDownload) != 200:
+            downloadResult = tile.download(forceDownload)
+            downloadedTiles += 1
+            print("Saving [" + str(downloadedTiles), "of", str(len(self.tiles)) + "]", tile.getProcessedURL(), "to", tile.getFileName())
+            if downloadResult != 200:
                 if forceDownload:
                     # Ignore errors, continue downloading, pass it on later
                     error = 1

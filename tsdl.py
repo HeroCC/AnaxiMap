@@ -108,8 +108,13 @@ class TileCollection:
             tile = self.tiles[0]
             tile.download()
             print("Guessing future tile extensions will be", tile.tileExtension + ". Pass --forceDownload to bypass")
-            self.tileServer += tile.tileExtension
-            self.__regenTiles()
+            newExt = tile.tileExtension
+            for tile in self.tiles:
+                # Regening the tiles with the new extension breaks some download URLs, and not doing so breaks cache.
+                # This is a happy medium, although a bit hacky
+                tile.tileExtension = newExt
+            #self.tileServer += tile.tileExtension
+            #self.__regenTiles()
 
         downloadedTiles = 0
         for tile in self.tiles:

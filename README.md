@@ -27,8 +27,8 @@ $ python3 tsdl.py -h
 Starting Anaxi Tile Downloader...
 
 usage: tsdl.py [-h] [--tilesDir TILESDIR] [--stitchFormat STITCHFORMAT]
-               [--noStitch] [--forceDownload]
-               [--printSourcesAndExit]
+               [--noStitch] [--forceDownload] [--printSourcesAndExit]
+               [--dryRun]
                latStart lonStart latEnd lonEnd zoom tileServer
 
 Download and stitch tile images from GIS / TMS Tile Servers
@@ -50,7 +50,7 @@ optional arguments:
   --noStitch            Don't stitch tiles together
   --forceDownload       Skip checking if files are already downloaded
   --printSourcesAndExit Print known tile sources and exit
-
+  --dryRun              Print download area, expected number of tiles and exit
 
 $ python3 tsdl.py 42.363531 -71.096362 42.354185 -71.069741 17 https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
 ```

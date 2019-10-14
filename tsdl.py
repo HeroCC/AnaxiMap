@@ -350,6 +350,7 @@ def genInfoFile(tileCollection):
     print("tileEndY=", tileCollection.tileEndY, file=infoFile)
     print("zoom=", tileCollection.zoom, file=infoFile)
     print("numTiles=", len(tileCollection.tiles), file=infoFile)
+    print("mapFile=", tileCollection.getMapName(), file=infoFile)
     print("cmd=", " ".join(sys.argv), file=infoFile)
 
 

@@ -1,6 +1,7 @@
 tiles/
 *.png
 *.jpg
+*.info
 
 # Created by https://www.gitignore.io/api/vim,venv,linux,macos,emacs,python,windows,pycharm
 # Edit at https://www.gitignore.io/?templates=vim,venv,linux,macos,emacs,python,windows,pycharm

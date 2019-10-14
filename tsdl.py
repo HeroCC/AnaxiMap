@@ -122,11 +122,9 @@ class TileCollection:
             downloadedTiles += 1
             print("Saving [" + str(downloadedTiles), "of", str(len(self.tiles)) + "]", tile.getProcessedURL(), "to", tile.getFileName())
             if downloadResult != 200:
-                if forceDownload:
-                    # Ignore errors, continue downloading, pass it on later
-                    error = 1
-                else:
-                    return 1
+                error = 1
+                if not forceDownload:
+                    break
 
         return error
 
@@ -197,7 +195,7 @@ class TileCollection:
         image.save(stitchedImageName)
         print("Stitched image saved to {}".format(os.path.abspath(stitchedImageName)))
 
-        return 0
+        return {'err': 0, 'image': image, 'imageName': stitchedImageName}
 
 
 def checkPilInstalled():
@@ -344,6 +342,9 @@ def genInfoFile(tileCollection):
     print("tileStartY=", tileCollection.tileStartY, file=infoFile)
     print("tileEndX=", tileCollection.tileEndX, file=infoFile)
     print("tileEndY=", tileCollection.tileEndY, file=infoFile)
+    print("zoom=", tileCollection.zoom, file=infoFile)
+    print("numTiles=", len(tileCollection.tiles), file=infoFile)
+    print("cmd=", " ".join(sys.argv), file=infoFile)
 
 
 def processTileParams(prefs):
@@ -398,7 +399,8 @@ def processTileParams(prefs):
         print("Download Complete!")
         if not prefs.noStitch:
             print("Stitching images...")
-            if tileCol.stitchImages(prefs.stitchFormat) == 0:
+            stitchResult = tileCol.stitchImages(prefs.stitchFormat)
+            if stitchResult["err"] == 0:
                 return genInfoFile(tileCol)
 
     return downloadErr

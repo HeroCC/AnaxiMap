@@ -15,7 +15,7 @@ import tilenames
 
 class AnaxiPreferences:
     def __init__(self, latStart, lonStart, latEnd, lonEnd, zoom, tileServer,
-                 tilesDir="tiles", stitchFormat="", noStitch=False, interactive=True, forceDownload=False,
+                 name="tiles", stitchFormat="", noStitch=False, interactive=True, forceDownload=False,
                  dryRun=False):
         self.latStart = latStart
         self.lonStart = lonStart
@@ -23,7 +23,7 @@ class AnaxiPreferences:
         self.lonEnd = lonEnd
         self.zoom = zoom
         self.tileServer = tileServer
-        self.tilesDir = tilesDir
+        self.name = name
         self.stitchFormat = stitchFormat
         self.noStitch = noStitch
         self.interactive = interactive
@@ -91,13 +91,14 @@ class Tile:
 
 
 class TileCollection:
-    def __init__(self, tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileServer):
+    def __init__(self, tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileServer, name):
         self.tileServer = tileServer
         self.tileStartX = tileStartX
         self.tileStartY = tileStartY
         self.tileEndX = tileEndX
         self.tileEndY = tileEndY
         self.zoom = zoom
+        self.name = name
 
         self.tiles = []
         self.__regenTiles()
@@ -137,6 +138,11 @@ class TileCollection:
     def getMapName(self, stitchSaveFormat=""):
         if not stitchSaveFormat:
             stitchSaveFormat = self.tiles[0].tileExtension
+
+        stitchSaveFormat = stitchSaveFormat.strip()
+
+        if self.name is not "tiles":
+            return self.name + stitchSaveFormat
 
         return "Map_{}_{}-{}_{}-{}{}".format(self.zoom, self.tileStartX, self.tileEndX, self.tileStartY, self.tileEndY, stitchSaveFormat)
 
@@ -304,7 +310,7 @@ def commandLinePrefsParse():
     coordsGroup.add_argument('lonEnd', type=float, help="Ending Longitude Coordinate")
     parser.add_argument('zoom', type=int, help="Level of Zoom / Detail (more zoom + large area = huge image)")
     parser.add_argument('tileServer', type=str, help="URL (or ID) of the Tile Server to download from")
-    parser.add_argument('--tilesDir', type=str, default="tiles", help="Where to save tiles / Map")
+    parser.add_argument('--name', type=str, default="tiles", help="Where to save tiles / Map")
     parser.add_argument('--stitchFormat', type=str, default="", help="Format to save stitched Map as")
     parser.add_argument('--noStitch', action='store_true', help="Don't stitch tiles together")
     parser.add_argument('--forceDownload', action='store_true', help="Skip checking if files are already downloaded")
@@ -313,7 +319,7 @@ def commandLinePrefsParse():
 
     args = parser.parse_args()
     return AnaxiPreferences(args.latStart, args.lonStart, args.latEnd, args.lonEnd, args.zoom, args.tileServer,
-                            args.tilesDir, args.stitchFormat, interactive=False, noStitch=args.noStitch,
+                            args.name, args.stitchFormat, interactive=False, noStitch=args.noStitch,
                             forceDownload=args.forceDownload, dryRun=args.dryRun)
 
 
@@ -322,7 +328,7 @@ def getFileExtension(tileServerURL):
 
 
 def genInfoFile(tileCollection):
-    infoFileName = tileCollection.getMapName() + ".info"
+    infoFileName = tileCollection.getMapName(" ") + ".info"
     print("Writing info file to", infoFileName)
 
     # S lat, W lon, N lat, E lon
@@ -387,12 +393,17 @@ def processTileParams(prefs):
         print("Dry run, exiting now...")
         return 0
 
-    if not os.path.exists(prefs.tilesDir):
-        os.mkdir(prefs.tilesDir)
+    if not os.path.exists(prefs.name):
+        os.mkdir(prefs.name)
 
-    os.chdir(prefs.tilesDir)
+    os.chdir(prefs.name)
 
-    tileCol = TileCollection(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, prefs.tileServer)
+    tileCol = TileCollection(tileStartX, tileStartY, tileEndX, tileEndY, prefs.zoom, prefs.tileServer, prefs.name)
+
+    if not os.path.exists("raw"):
+        os.mkdir("raw")
+
+    os.chdir("raw")
 
     downloadErr = tileCol.downloadTiles(prefs.forceDownload)
     if downloadErr == 0:
@@ -401,6 +412,8 @@ def processTileParams(prefs):
             print("Stitching images...")
             stitchResult = tileCol.stitchImages(prefs.stitchFormat)
             if stitchResult["err"] == 0:
+                os.rename(stitchResult["imageName"], "../" + stitchResult["imageName"])
+                os.chdir("..")
                 return genInfoFile(tileCol)
 
     return downloadErr

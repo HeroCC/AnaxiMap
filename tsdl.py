@@ -221,12 +221,12 @@ def getDefaultTileServers():
     # [sourcetype, title, authconfig, password, license, url, username, zmax, zmin]
 
     sources = []
-    sources.append(["connections-xyz", "Google Maps", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=m&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
-    sources.append(["connections-xyz", "Google Satellite", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=s&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
-    sources.append(["connections-xyz", "Google Terrain", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=t&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
-    sources.append(["connections-xyz", "Google Terrain Hybrid", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=p&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
-    sources.append(["connections-xyz", "Google Satellite Hybrid", "", "", "", "https://mt" + str(random.choice([0, 1, 2, 3])) + ".google.com/vt/lyrs=y&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
-    sources.append(["connections-xyz", "US National Map Imagery", "", "", "", "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/%zoom%/%xTile%/%yTile%", "", "16", "0"]),
+    sources.append(["connections-xyz", "Google Maps", "", "", "", "https://mt.google.com/vt/lyrs=m&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "Google Satellite", "", "", "", "https://mt.google.com/vt/lyrs=s&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "Google Terrain", "", "", "", "https://mt.google.com/vt/lyrs=t&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "Google Terrain Hybrid", "", "", "", "https://mt.google.com/vt/lyrs=p&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "Google Satellite Hybrid", "", "", "", "https://mt.google.com/vt/lyrs=y&x=%xTile%&y=%yTile%&z=%zoom%", "", "19", "0"])
+    sources.append(["connections-xyz", "US National Map Imagery", "", "", "Public Domain (Excluding Alaska) https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer", "https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/%zoom%/%yTile%/%xTile%", "", "16", "0"]),
     sources.append(["connections-xyz", "Stamen Terrain", "", "", "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL", "http://tile.stamen.com/terrain/%zoom%/%xTile%/%yTile%.png", "", "20", "0"])
     sources.append(["connections-xyz", "Stamen Toner", "", "", "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL", "http://tile.stamen.com/toner/%zoom%/%xTile%/%yTile%.png", "", "20", "0"])
     sources.append(["connections-xyz", "Stamen Toner Light", "", "", "Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL", "http://tile.stamen.com/toner-lite/%zoom%/%xTile%/%yTile%.png", "", "20", "0"])

@@ -86,7 +86,7 @@ Stitching 16_19831_24242.png
 ...
 Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]: 
 Saving to Map_16_19825-19831_24238-24242.png...
-Stitched image saved to /Users/conlanc/TSdl/tiles/Map_16_19825-19831_24238-24242.png
+Stitched image saved to tiles/Map_16_19825-19831_24238-24242.png
 ```
 
 ## Potential Servers
@@ -96,6 +96,7 @@ Below is a small list of sources for Tile Servers. Beware, some of the linked se
 
 To format the URL correctly, replace the zoom, x tile, and y tile spot with %zoom%, %xTile%, and %yTile% respectively. Ensure that the URL ends in a file extension (usually .jpg for satellite / terrain maps and .png for others), and that the tile server returns images that are 256px by 256px. You should have something that looks like this: `https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png` 
 
+* [USA/NA Tiles](https://viewer.nationalmap.gov/services/)
 * [Index of many TMS Servers](https://qms.nextgis.com/)
 * [MapTiler Cloud](https://cloud.maptiler.com/maps/) (free account for non-commercial use)
 * https://wiki.openstreetmap.org/wiki/Tile_servers
@@ -106,6 +107,7 @@ To format the URL correctly, replace the zoom, x tile, and y tile spot with %zoo
 ## See Also
 * [Bounding Box generator / size estimator](https://tools.geofabrik.de/calc/)
 * [Alternate bounding box generator](https://boundingbox.klokantech.com/)
+* [US National Map Service Advanced Map Biewer](https://viewer.nationalmap.gov/advanced-viewer/)
 * [QGis: FOSS geographical information system](https://github.com/qgis/QGIS)
 * [Official Google Maps Tile API](https://developers.google.com/maps/documentation/tile/#map_tiles)
 * [Alternative Map Tile Downloader](https://wiki.openstreetmap.org/wiki/GDAL2Tiles)

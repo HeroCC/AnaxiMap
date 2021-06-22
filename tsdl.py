@@ -141,7 +141,7 @@ class TileCollection:
 
         stitchSaveFormat = stitchSaveFormat.strip()
 
-        if self.name is not "tiles":
+        if self.name != "tiles":
             return self.name + stitchSaveFormat
 
         return "Map_{}_{}-{}_{}-{}{}".format(self.zoom, self.tileStartX, self.tileEndX, self.tileStartY, self.tileEndY, stitchSaveFormat)

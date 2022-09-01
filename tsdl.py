@@ -176,7 +176,7 @@ class TileCollection:
         width = abs((self.tileEndX - self.tileStartX)) * tilePixelSize[0]
         height = abs((self.tileStartY - self.tileEndY)) * tilePixelSize[1]
 
-        image = Image.new("RGBA", (width, height))
+        image = Image.new("RGB" + ("A" if stitchSaveFormat not in [".jpg", ".jpeg"] else ""), (width, height))
 
         stitchedTiles = 0
         for tile in self.tiles:

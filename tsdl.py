@@ -89,6 +89,24 @@ class Tile:
 
         return False  # assume not corrupt if PIL isn't installed
 
+    def hasTransparency(self):
+        img = Image.open(self.getFileName())
+        # https://stackoverflow.com/a/58567453/1709894
+        if img.info.get("transparency", None) is not None:
+            return True
+        if img.mode == "P":
+            transparent = img.info.get("transparency", -1)
+            for _, index in img.getcolors():
+                if index == transparent:
+                    return True
+        elif img.mode == "RGBA":
+            extrema = img.getextrema()
+            if extrema[3][0] < 255:
+                return True
+
+        return False
+
+
 
 class TileCollection:
     def __init__(self, tileStartX, tileStartY, tileEndX, tileEndY, zoom, tileServer, name):
@@ -176,7 +194,7 @@ class TileCollection:
         width = abs((self.tileEndX - self.tileStartX)) * tilePixelSize[0]
         height = abs((self.tileStartY - self.tileEndY)) * tilePixelSize[1]
 
-        image = Image.new("RGB" + ("A" if stitchSaveFormat not in [".jpg", ".jpeg"] else ""), (width, height))
+        image = Image.new("RGB" + ("A" if self.tiles[0].hasTransparency() else ""), (width, height))
 
         stitchedTiles = 0
         for tile in self.tiles:

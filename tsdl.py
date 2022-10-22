@@ -191,8 +191,10 @@ class TileCollection:
 
         tilePixelSize = self.getMaxTileSize()
 
-        width = abs((self.tileEndX - self.tileStartX)) * tilePixelSize[0]
-        height = abs((self.tileStartY - self.tileEndY)) * tilePixelSize[1]
+        width = (abs((self.tileEndX - self.tileStartX)) + 1) * tilePixelSize[0]
+        height = (abs((self.tileStartY - self.tileEndY)) + 1) * tilePixelSize[1]
+
+        print("Canvas Size: %dw x %dh" % (width, height))
 
         image = Image.new("RGB" + ("A" if self.tiles[0].hasTransparency() else ""), (width, height))
 
@@ -201,13 +203,13 @@ class TileCollection:
             fileName = tile.getFileName()
 
             xPastePixel = (tile.tileX - self.tileStartX) * tilePixelSize[0]
-            yPastePixel = height - (self.tileEndY - tile.tileY) * tilePixelSize[1]
+            yPastePixel = (height - tilePixelSize[1]) - (self.tileEndY - tile.tileY) * tilePixelSize[1]
+
+            stitchedTiles += 1
+            print("Stitching [" + str(stitchedTiles), "of", str(len(self.tiles)) + "]", fileName, "to %d, %d" % (xPastePixel, yPastePixel))
 
             tileImage = Image.open(fileName)
-
             image.paste(tileImage, (xPastePixel, yPastePixel))
-            stitchedTiles += 1
-            print("Stitched [" + str(stitchedTiles), "of", str(len(self.tiles)) + "]", fileName)
 
         image.info['tileStartX'] = self.tileStartX
         image.info['tileStartY'] = self.tileStartY

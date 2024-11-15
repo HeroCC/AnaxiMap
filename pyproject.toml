@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+source = "vcs"
+
+[project]
+name = "AnaxiMap"
+dynamic = ["version"]
+authors = [
+  { name="Conlan Cesar", email="conlan.cesar@csail.mit.edu" },
+]
+description = "Downloads and Stitches images grabbed from GIS Tile Services"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Operating System :: OS Independent",
+]
+dependencies = [
+  "requests==2.*",
+  "Pillow>=10.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/HeroCC/AnaxiMap"
+Issues = "https://github.com/HeroCC/AnaxiMap/issues"
+
+[project.scripts]
+anaxi = "anaximap.tsdl:main"

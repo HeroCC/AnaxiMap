@@ -10,7 +10,7 @@ from mimetypes import guess_extension
 
 import requests
 
-import tilenames
+from . import tilenames
 
 
 class AnaxiPreferences:
@@ -236,7 +236,7 @@ def checkPilInstalled():
 
 
 def getDefaultTileServers():
-    # Connections sourced, with a few tweaks, from 
+    # Connections sourced, with a few tweaks, from
     # https://raw.githubusercontent.com/klakar/QGIS_resources/master/collections/Geosupportsystem/python/qgis_basemaps.py
     # [sourcetype, title, authconfig, password, license, url, username, zmax, zmin]
 

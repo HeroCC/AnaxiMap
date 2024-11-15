@@ -1,21 +1,29 @@
 # Anaxi Tile Downloader
 Downloads and stitches images downloaded from Map Tile servers.
 
-## Dependencies
-Assuming you have Python 3 installed and in your `$PATH`, you can run `pip3 install -r requirements.txt` and all required dependencies will be installed. For best results, use a [VirtualEnv](https://virtualenv.pypa.io/en/stable/userguide/#). If you'd prefer not to use requirements.txt, the manual install instructions are below.
+## Installing
+We recommend installing AnaxiMap via the use of `pipx`, which makes a new unique virtual environment for us.
 
-* Python 3
-* Python Requests (`pip3 install --user requests==2.*`)
-* Python Pillow (`pip3 install --user Pillow=6.*`) -- optional, used for image stitching and corruption checking
+To [install pipx](https://pipx.pypa.io/stable/installation/#installing-pipx) on MacOS:
+```shell
+brew install pipx
+pipx ensurepath
+```
+
+Then, install AnaxiMap:
+```shell
+pipx install git+https://github.com/HeroCC/AnaxiMap.git
+anaxi --help
+```
 
 ## Usage
-After ensuring your dependencies are installed, you can run the program with `python3 tsdl.py`. It will prompt you for your bounding Lat and Long coordinates, zoom, and tile server URL. 
+After installing, you can run the program with `anaxi`. It will prompt you for your bounding Lat and Long coordinates, zoom, and tile server URL.
 
 For best results, the larger the area you select with your lat & long, the smaller you should have your zoom. If your zoom is too big, downloading will take longer, your resulting stitched file will be larger, and the tile server may throttle / restrict your usage. See this [OpenStreetMap Wiki page](https://wiki.openstreetmap.org/wiki/Zoom_levels) for scaling and examples, and [this tool](https://tools.geofabrik.de/calc "estimates file-size for bounds") to generate a bounding box.
 
-The program will tell you the coords it rounded to (make a note of these for geolocation, they are the top right and bottom left of the generated image), and start downloading the tiles to the `tiles/` folder. 
+The program will tell you the coords it rounded to (make a note of these for geolocation, they are the top right and bottom left of the generated image), and start downloading the tiles to the `tiles/` folder.
 
-After downloading all tiles, you will be asked if you'd like to stitch together the images. Type "y" to continue, or anything else to exit. The tiles will be stitched together, and saved to a file named with the pattern `Map_XMIN-XMAX_YMIN-YMAX.(.png|.jpg)`. 
+After downloading all tiles, you will be asked if you'd like to stitch together the images. Type "y" to continue, or anything else to exit. The tiles will be stitched together, and saved to a file named with the pattern `Map_XMIN-XMAX_YMIN-YMAX.(.png|.jpg)`.
 
 ## Example
 The following example will download and stitch tiles within an area of the MIT campus in Cambridge, Massachusetts.
@@ -23,10 +31,10 @@ The following example will download and stitch tiles within an area of the MIT c
 ### Command line format
 ```
 $ # Command-line format
-$ python3 tsdl.py -h
+$ anaxi -h
 Starting Anaxi Tile Downloader...
 
-usage: tsdl.py [-h] [--tilesDir TILESDIR] [--stitchFormat STITCHFORMAT]
+usage: anaxi [-h] [--tilesDir TILESDIR] [--stitchFormat STITCHFORMAT]
                [--noStitch] [--forceDownload] [--printSourcesAndExit]
                [--dryRun]
                latStart lonStart latEnd lonEnd zoom tileServer
@@ -52,12 +60,12 @@ optional arguments:
   --printSourcesAndExit Print known tile sources and exit
   --dryRun              Print download area, expected number of tiles and exit
 
-$ python3 tsdl.py 42.363531 -71.096362 42.354185 -71.069741 17 https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
+$ anaxi 42.363531 -71.096362 42.354185 -71.069741 17 https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png
 ```
 
 ### Interactive Format
 ```
-$ python3 tsdl.py
+$ anaxi
 Starting Anaxi Tile Downloader...
 Enter Starting Latitude: 42.363531
 Enter Starting Longitude: -71.096362
@@ -84,7 +92,7 @@ Stitching 16_19829_24242.png
 Stitching 16_19830_24242.png
 Stitching 16_19831_24242.png
 ...
-Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]: 
+Format to save as [Blank for suggested, or .jpg, .png, .tiff, etc]:
 Saving to Map_16_19825-19831_24238-24242.png...
 Stitched image saved to tiles/Map_16_19825-19831_24238-24242.png
 ```
@@ -92,9 +100,9 @@ Stitched image saved to tiles/Map_16_19825-19831_24238-24242.png
 ## Potential Servers
 Anaxi supports a number of tile servers out-of-the-box. You can find a full list of supported servers by running with the argument `--printSourcesAndExit`. To use them, pass their ID in place of the Tile Server URL when asked. I personally like MapTiler Cloud, Google Satellite Hybrid, and OpenStreetMap the best, though you should try several or look at the [link below](#see-also) for samples and see which you like the best.
 
-Below is a small list of sources for Tile Servers. Beware, some of the linked servers have restrictions on usage, zoom, and may throttle or deny service if you violate their terms. 
+Below is a small list of sources for Tile Servers. Beware, some of the linked servers have restrictions on usage, zoom, and may throttle or deny service if you violate their terms.
 
-To format the URL correctly, replace the zoom, x tile, and y tile spot with %zoom%, %xTile%, and %yTile% respectively. Ensure that the URL ends in a file extension (usually .jpg for satellite / terrain maps and .png for others), and that the tile server returns images that are 256px by 256px. You should have something that looks like this: `https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png` 
+To format the URL correctly, replace the zoom, x tile, and y tile spot with %zoom%, %xTile%, and %yTile% respectively. Ensure that the URL ends in a file extension (usually .jpg for satellite / terrain maps and .png for others), and that the tile server returns images that are 256px by 256px. You should have something that looks like this: `https://tile.openstreetmap.org/%zoom%/%xTile%/%yTile%.png`
 
 * [USA/NA Tiles](https://viewer.nationalmap.gov/services/)
 * [Index of many TMS Servers](https://qms.nextgis.com/)

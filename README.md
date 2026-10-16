@@ -2,17 +2,16 @@
 Downloads and stitches images downloaded from Map Tile servers.
 
 ## Installing
-We recommend installing AnaxiMap via the use of `pipx`, which makes a new unique virtual environment for us.
+We recommend installing AnaxiMap via the use of `uv tool`, which makes a new unique virtual environment for us.
 
-To [install pipx](https://pipx.pypa.io/stable/installation/#installing-pipx) on MacOS:
+To [install uv](https://docs.astral.sh/uv/getting-started/installation/) on MacOS:
 ```shell
-brew install pipx
-pipx ensurepath
+brew install uv
 ```
 
 Then, install AnaxiMap:
 ```shell
-pipx install git+https://github.com/HeroCC/AnaxiMap.git
+uv tool install git+https://github.com/HeroCC/AnaxiMap.git
 anaxi --help
 ```
 
